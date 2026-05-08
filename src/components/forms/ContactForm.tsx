@@ -46,11 +46,11 @@ export function ContactForm() {
             autoComplete="name"
             required
             placeholder="山田 太郎"
-            aria-invalid={!!state.errors?.name}
-            aria-describedby={state.errors?.name ? 'name-error' : undefined}
-            className={state.errors?.name ? 'border-red-500' : ''}
+            aria-invalid={!state.success && !!state.errors?.name}
+            aria-describedby={!state.success && state.errors?.name ? 'name-error' : undefined}
+            className={!state.success && state.errors?.name ? 'border-red-500' : ''}
           />
-          {state.errors?.name && (
+          {!state.success && state.errors?.name && (
             <p id="name-error" className="text-sm text-red-500">{state.errors.name[0]}</p>
           )}
         </div>
@@ -65,11 +65,11 @@ export function ContactForm() {
             autoComplete="email"
             required
             placeholder="taro@example.com"
-            aria-invalid={!!state.errors?.email}
-            aria-describedby={state.errors?.email ? 'email-error' : undefined}
-            className={state.errors?.email ? 'border-red-500' : ''}
+            aria-invalid={!state.success && !!state.errors?.email}
+            aria-describedby={!state.success && state.errors?.email ? 'email-error' : undefined}
+            className={!state.success && state.errors?.email ? 'border-red-500' : ''}
           />
-          {state.errors?.email && (
+          {!state.success && state.errors?.email && (
             <p id="email-error" className="text-sm text-red-500">{state.errors.email[0]}</p>
           )}
         </div>
@@ -85,11 +85,11 @@ export function ContactForm() {
           type="text"
           required
           placeholder="転職についての相談"
-          aria-invalid={!!state.errors?.subject}
-          aria-describedby={state.errors?.subject ? 'subject-error' : undefined}
-          className={state.errors?.subject ? 'border-red-500' : ''}
+          aria-invalid={!state.success && !!state.errors?.subject}
+          aria-describedby={!state.success && state.errors?.subject ? 'subject-error' : undefined}
+          className={!state.success && state.errors?.subject ? 'border-red-500' : ''}
         />
-        {state.errors?.subject && (
+        {!state.success && state.errors?.subject && (
           <p id="subject-error" className="text-sm text-red-500">{state.errors.subject[0]}</p>
         )}
       </div>
@@ -104,11 +104,11 @@ export function ContactForm() {
           required
           rows={6}
           placeholder="お問い合わせ内容をご記入ください。"
-          aria-invalid={!!state.errors?.body}
-          aria-describedby={state.errors?.body ? 'body-error' : undefined}
-          className={state.errors?.body ? 'border-red-500' : ''}
+          aria-invalid={!state.success && !!state.errors?.body}
+          aria-describedby={!state.success && state.errors?.body ? 'body-error' : undefined}
+          className={!state.success && state.errors?.body ? 'border-red-500' : ''}
         />
-        {state.errors?.body && (
+        {!state.success && state.errors?.body && (
           <p id="body-error" className="text-sm text-red-500">{state.errors.body[0]}</p>
         )}
       </div>
