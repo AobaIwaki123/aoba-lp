@@ -218,14 +218,14 @@ hp-project/
 ### Phase 4: フォーム機能
 
 ```
-1. [ ] Zod スキーマ定義 (lib/validations/contact.ts)
-2. [ ] Server Action 実装 (lib/actions/contact.ts)
-3. [ ] DB 書き込みクエリ (lib/db/queries/contact.ts)
-4. [ ] フォームとServer Actionの接続
-5. [ ] Honeypot フィールド追加 (不可視、ボット対策)
-6. [ ] エラーハンドリング・インラインエラー表示
-7. [ ] /contact/success サンクスページ実装
-8. [ ] メール通知 (Resend)
+1. [x] Zod スキーマ定義 (lib/validations/contact.ts)
+2. [x] Server Action 実装 (lib/actions/contact.ts)
+3. [x] DB 書き込みクエリ (lib/db/queries/contact.ts)
+4. [x] フォームとServer Actionの接続
+5. [x] Honeypot フィールド追加 (不可視、ボット対策)
+6. [x] エラーハンドリング・インラインエラー表示
+7. [x] /contact/success サンクスページ実装
+8. [x] メール通知 (Resend)
 ```
 
 ### Phase 5: Three.js 演出 + A/B バリアント完成

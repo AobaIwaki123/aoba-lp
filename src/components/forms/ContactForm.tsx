@@ -1,21 +1,39 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
+import { submitContact, type ActionResult } from '@/lib/actions/contact'
+
+const initialState: ActionResult = { success: true, id: '' }
 
 export function ContactForm() {
   const [agreed, setAgreed] = useState(false)
+  const router = useRouter()
+  const [state, formAction, isPending] = useActionState(submitContact, initialState)
+
+  useEffect(() => {
+    if (state.success && state.id) {
+      router.push('/contact/success')
+    }
+  }, [state, router])
 
   return (
     <form
-      onSubmit={(e) => e.preventDefault()}
+      action={formAction}
       className="space-y-6"
       noValidate
     >
+      {!state.success && state.error && (
+        <div role="alert" className="p-4 bg-red-50 text-red-600 rounded-md text-sm border border-red-200">
+          {state.error}
+        </div>
+      )}
+
       <div className="grid sm:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="name" style={{ color: 'var(--color-text)' }}>
@@ -28,7 +46,13 @@ export function ContactForm() {
             autoComplete="name"
             required
             placeholder="山田 太郎"
+            aria-invalid={!!state.errors?.name}
+            aria-describedby={state.errors?.name ? 'name-error' : undefined}
+            className={state.errors?.name ? 'border-red-500' : ''}
           />
+          {state.errors?.name && (
+            <p id="name-error" className="text-sm text-red-500">{state.errors.name[0]}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="email" style={{ color: 'var(--color-text)' }}>
@@ -41,7 +65,13 @@ export function ContactForm() {
             autoComplete="email"
             required
             placeholder="taro@example.com"
+            aria-invalid={!!state.errors?.email}
+            aria-describedby={state.errors?.email ? 'email-error' : undefined}
+            className={state.errors?.email ? 'border-red-500' : ''}
           />
+          {state.errors?.email && (
+            <p id="email-error" className="text-sm text-red-500">{state.errors.email[0]}</p>
+          )}
         </div>
       </div>
 
@@ -55,7 +85,13 @@ export function ContactForm() {
           type="text"
           required
           placeholder="転職についての相談"
+          aria-invalid={!!state.errors?.subject}
+          aria-describedby={state.errors?.subject ? 'subject-error' : undefined}
+          className={state.errors?.subject ? 'border-red-500' : ''}
         />
+        {state.errors?.subject && (
+          <p id="subject-error" className="text-sm text-red-500">{state.errors.subject[0]}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -68,7 +104,13 @@ export function ContactForm() {
           required
           rows={6}
           placeholder="お問い合わせ内容をご記入ください。"
+          aria-invalid={!!state.errors?.body}
+          aria-describedby={state.errors?.body ? 'body-error' : undefined}
+          className={state.errors?.body ? 'border-red-500' : ''}
         />
+        {state.errors?.body && (
+          <p id="body-error" className="text-sm text-red-500">{state.errors.body[0]}</p>
+        )}
       </div>
 
       {/* Honeypot — ボット対策 */}
@@ -96,11 +138,11 @@ export function ContactForm() {
 
       <Button
         type="submit"
-        disabled={!agreed}
+        disabled={!agreed || isPending}
         className="w-full py-6 text-base font-semibold"
         style={{ background: 'var(--color-brand)' }}
       >
-        送信する
+        {isPending ? '送信中...' : '送信する'}
       </Button>
 
       <p className="text-center text-xs" style={{ color: 'var(--color-text-muted)' }}>
