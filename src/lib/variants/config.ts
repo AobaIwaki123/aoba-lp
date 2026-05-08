@@ -1,6 +1,6 @@
 import type { Variant } from './types'
 
-type VariantConfig = {
+export type VariantConfig = {
   show3D: boolean
   font: string
   heroHeadline: string

@@ -71,6 +71,7 @@
   --color-brand-dark:      #3730a3;
   --color-accent-brand:    #06b6d4;
   --color-border-brand:    #e2e8f0;
+  --overlay-photo:         rgba(15, 23, 42, 0.4);
 }
 
 /* ───────────────────────────
@@ -89,6 +90,7 @@
   --color-brand-dark:      #7c3aed;
   --color-accent-brand:    #ec4899;
   --color-border-brand:    #3f3f46;
+  --overlay-photo:         rgba(9, 9, 11, 0.6);
 }
 
 /* ───────────────────────────
@@ -107,6 +109,7 @@
   --color-brand-dark:      #b45309;
   --color-accent-brand:    #f43f5e;
   --color-border-brand:    #e7e5e4;
+  --overlay-photo:         rgba(28, 25, 23, 0.3);
 }
 
 /* ───────────────────────────
