@@ -231,16 +231,16 @@ hp-project/
 ### Phase 5: Three.js 演出 + A/B バリアント完成
 
 ```
-1. [ ] @react-three/fiber セットアップ
-2. [ ] Scene.tsx (Canvas + カメラ + ライト、バリアント共通ラッパー)
-3. [ ] ParticleNetwork.tsx (Concept A)
-4. [ ] WireframeIcosahedron.tsx (Concept B)
-5. [ ] FloatingSpheres.tsx (Concept C)
-6. [ ] HeroB.tsx, HeroC.tsx の実装 (HeroA.tsx に続いて)
-7. [ ] next/dynamic で全 Canvas を遅延読み込み
-8. [ ] モバイル判定 (useMediaQuery) で WebGL 無効化 + 代替表示
-9. [ ] Framer Motion スクロール連動 (whileInView)
-10.[ ] ?__variant=A|B|C で強制切り替え確認
+1. [x] @react-three/fiber セットアップ
+2. [x] Scene.tsx (Canvas + カメラ + ライト、バリアント共通ラッパー)
+3. [x] ParticleNetwork.tsx (Concept A)
+4. [x] WireframeIcosahedron.tsx (Concept B)
+5. [x] FloatingSpheres.tsx (Concept C)
+6. [x] HeroB.tsx, HeroC.tsx の実装 (HeroA.tsx に続いて)
+7. [x] next/dynamic で全 Canvas を遅延読み込み
+8. [x] モバイル判定 (useMediaQuery) で WebGL 無効化 + 代替表示
+9. [x] Framer Motion スクロール連動 (whileInView)
+10.[x] ?__variant=A|B|C で強制切り替え確認
 ```
 
 ### Phase 6: 品質・本番対応

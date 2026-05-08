@@ -2,6 +2,8 @@ import { cookies } from 'next/headers'
 import type { Variant } from '@/lib/variants/types'
 import { variantConfig } from '@/lib/variants/config'
 import { HeroA } from '@/components/sections/hero/HeroA'
+import { HeroB } from '@/components/sections/hero/HeroB'
+import { HeroC } from '@/components/sections/hero/HeroC'
 import { StatsSection } from '@/components/sections/StatsSection'
 import { LogoBarSection } from '@/components/sections/LogoBarSection'
 import { ServicesSection } from '@/components/sections/ServicesSection'
@@ -17,8 +19,9 @@ export default async function LandingPage() {
 
   return (
     <>
-      {/* Phase 5 で HeroB / HeroC を追加 */}
-      <HeroA config={config} />
+      {variant === 'A' && <HeroA config={config} />}
+      {variant === 'B' && <HeroB config={config} />}
+      {variant === 'C' && <HeroC config={config} />}
       <StatsSection />
       <LogoBarSection />
       <ServicesSection />
