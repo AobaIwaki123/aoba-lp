@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { Variant } from '@/lib/variants/types'
 
+type Variant = 'A' | 'B' | 'C'
 const VARIANTS: Variant[] = ['A', 'B', 'C']
 
 export function middleware(request: NextRequest) {
   const res = NextResponse.next()
 
   const forced = request.nextUrl.searchParams.get('__variant') as Variant | null
-  if (forced && VARIANTS.includes(forced)) {
+  if (forced && (VARIANTS as string[]).includes(forced)) {
     res.cookies.set('variant', forced, {
       maxAge: 60 * 60,
       httpOnly: true,
