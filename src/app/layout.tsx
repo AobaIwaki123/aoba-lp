@@ -31,6 +31,19 @@ export const metadata: Metadata = {
   },
   description:
     '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。専任のキャリアアドバイザーが転職活動を全面サポートします。',
+  openGraph: {
+    title: '求人サービス | キャリアの可能性を広げる',
+    description: '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com',
+    siteName: '求人サービス',
+    locale: 'ja_JP',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '求人サービス | キャリアの可能性を広げる',
+    description: '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。',
+  },
 }
 
 export default async function RootLayout({

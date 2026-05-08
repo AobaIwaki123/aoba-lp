@@ -6,6 +6,7 @@ import { Redis } from '@upstash/redis'
 import { contactSchema } from '@/lib/validations/contact'
 import { insertContact } from '@/lib/db/queries/contact'
 import { sendNotification } from '@/lib/email'
+import { notifySlack } from '@/lib/slack'
 import type { Variant } from '@/lib/variants/types'
 
 const redis = process.env.UPSTASH_REDIS_REST_URL
@@ -38,6 +39,7 @@ export async function submitContact(
   if (ratelimit) {
     const { success: rateLimitOk } = await ratelimit.limit(ip)
     if (!rateLimitOk) {
+      void notifySlack(`⚠️ レート制限超過: IP=${ip}`)
       return { success: false, error: 'しばらく時間をおいてから再送してください' }
     }
   }
@@ -68,6 +70,7 @@ export async function submitContact(
     return { success: true, id: contact.id }
   } catch (error) {
     console.error('Failed to insert contact:', error)
+    void notifySlack(`❌ お問い合わせ保存失敗: ${error instanceof Error ? error.message : 'Unknown error'}`)
     return { success: false, error: '送信中にエラーが発生しました。時間をおいて再度お試しください。' }
   }
 }

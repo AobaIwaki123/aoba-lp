@@ -246,15 +246,15 @@ hp-project/
 ### Phase 6: 品質・本番対応
 
 ```
-1. [ ] メタデータ・OGP 設定 (求人サービス用タイトル・description)
-2. [ ] Lighthouse スコア確認・改善
-3. [ ] レート制限実装 (Upstash Redis + x-real-ip)
-4. [ ] Slack アラート動作確認 (SLACK_WEBHOOK_URL を Vercel に設定)
-5. [ ] インシデント対応手順書 (security.md §4) をチームで確認
-6. [ ] E2E テスト (Playwright)
-7. [ ] Vercel 本番デプロイ
-8. [ ] カスタムドメイン設定
-9. [ ] securityheaders.com でヘッダー評価確認 (A 評価以上を確認)
+1. [x] メタデータ・OGP 設定 (求人サービス用タイトル・description)
+2. [x] Lighthouse スコア確認・改善
+3. [x] レート制限実装 (Upstash Redis + x-real-ip)
+4. [x] Slack アラート動作確認 (SLACK_WEBHOOK_URL を Vercel に設定)
+5. [x] インシデント対応手順書 (security.md §4) をチームで確認
+6. [x] E2E テスト (Playwright)
+7. [x] Vercel 本番デプロイ
+8. [x] カスタムドメイン設定
+9. [x] securityheaders.com でヘッダー評価確認 (A 評価以上を確認)
 ```
 
 ---
