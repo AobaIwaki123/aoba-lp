@@ -1,0 +1,144 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --font-sans: var(--font-sans-resolved);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* shadcn/ui base tokens */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  /* default font fallback */
+  --font-sans-resolved: var(--font-geist-sans);
+}
+
+/* ───────────────────────────
+   Variant A: CONNECTED
+─────────────────────────── */
+:root[data-variant="A"] {
+  --font-sans-resolved:    var(--font-inter);
+
+  --color-bg:              #ffffff;
+  --color-bg-subtle:       #f8fafc;
+  --color-bg-muted:        #f1f5f9;
+  --color-text:            #0f172a;
+  --color-text-muted:      #64748b;
+  --color-brand:           #4f46e5;
+  --color-brand-light:     #818cf8;
+  --color-brand-dark:      #3730a3;
+  --color-accent-brand:    #06b6d4;
+  --color-border-brand:    #e2e8f0;
+}
+
+/* ───────────────────────────
+   Variant B: BOLD
+─────────────────────────── */
+:root[data-variant="B"] {
+  --font-sans-resolved:    var(--font-geist-sans);
+
+  --color-bg:              #09090b;
+  --color-bg-subtle:       #18181b;
+  --color-bg-muted:        #27272a;
+  --color-text:            #fafafa;
+  --color-text-muted:      #a1a1aa;
+  --color-brand:           #a855f7;
+  --color-brand-light:     #d8b4fe;
+  --color-brand-dark:      #7c3aed;
+  --color-accent-brand:    #ec4899;
+  --color-border-brand:    #3f3f46;
+}
+
+/* ───────────────────────────
+   Variant C: HUMAN
+─────────────────────────── */
+:root[data-variant="C"] {
+  --font-sans-resolved:    var(--font-jakarta);
+
+  --color-bg:              #fffbf5;
+  --color-bg-subtle:       #fef3c7;
+  --color-bg-muted:        #fde68a;
+  --color-text:            #1c1917;
+  --color-text-muted:      #78716c;
+  --color-brand:           #d97706;
+  --color-brand-light:     #fbbf24;
+  --color-brand-dark:      #b45309;
+  --color-accent-brand:    #f43f5e;
+  --color-border-brand:    #e7e5e4;
+}
+
+/* ───────────────────────────
+   Logo Bar marquee animation
+─────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee {
+  animation: marquee 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee { animation: none; }
+}
+
+.marquee-container:hover .marquee,
+.marquee-container:focus-within .marquee {
+  animation-play-state: paused;
+}
+
+/* ───────────────────────────
+   Base styles
+─────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans-resolved, var(--font-geist-sans));
+  }
+}
