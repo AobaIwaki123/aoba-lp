@@ -202,15 +202,15 @@ hp-project/
 ### Phase 3: ページ実装
 
 ```
-1. [ ] globals.css にバリアント別 CSS カスタムプロパティ定義 (design.md §3〜§5 参照)
-2. [ ] middleware.ts — バリアント Cookie 割り当て実装
-3. [ ] lib/variants/types.ts, config.ts
-4. [ ] LP (/) — 共通セクション (Stats / Services / HowItWorks / Testimonials / CTA)
+1. [x] globals.css にバリアント別 CSS カスタムプロパティ定義 (design.md §3〜§5 参照)
+2. [x] middleware.ts — バリアント Cookie 割り当て実装
+3. [x] lib/variants/types.ts, config.ts
+4. [x] LP (/) — 共通セクション (Stats / Services / HowItWorks / Testimonials / CTA)
        コンセプト A のデザイントークンで実装し、後から B/C を追加
-5. [ ] Hero — HeroA.tsx (3D なし、モックコピーのみ)
-6. [ ] /about
-7. [ ] /privacy-policy (静的)
-8. [ ] /contact — フォームUI (送信機能なし)
+5. [x] Hero — HeroA.tsx (3D なし、モックコピーのみ)
+6. [x] /about
+7. [x] /privacy-policy (静的)
+8. [x] /contact — フォームUI (送信機能なし)
 ```
 
 > **コンテンツ**: design.md §2 のモックコピーを使用。本番コンテンツは別途差し替え。
