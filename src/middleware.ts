@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 type Variant = 'A' | 'B' | 'C'
 const VARIANTS: Variant[] = ['A', 'B', 'C']
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const res = NextResponse.next()
 
   const forced = request.nextUrl.searchParams.get('__variant') as Variant | null
