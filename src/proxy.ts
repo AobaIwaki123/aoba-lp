@@ -9,7 +9,7 @@ export function proxy(request: NextRequest) {
   const forced = request.nextUrl.searchParams.get('__variant') as Variant | null
   if (forced && (VARIANTS as string[]).includes(forced)) {
     res.cookies.set('variant', forced, {
-      maxAge: 60 * 60,
+      maxAge: 60 * 60 * 24 * 30, // Override keeps it for a while too to test
       httpOnly: true,
       path: '/',
     })
@@ -17,7 +17,9 @@ export function proxy(request: NextRequest) {
   }
 
   if (!request.cookies.get('variant')) {
-    const v = VARIANTS[Math.floor(Math.random() * VARIANTS.length)]
+    // Starting with MVP: A and C only
+    const ACTIVE_VARIANTS: Variant[] = ['A', 'C']
+    const v = ACTIVE_VARIANTS[Math.floor(Math.random() * ACTIVE_VARIANTS.length)]
     res.cookies.set('variant', v, {
       maxAge: 60 * 60 * 24 * 30,
       httpOnly: true,
@@ -29,5 +31,14 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+  ],
 }
