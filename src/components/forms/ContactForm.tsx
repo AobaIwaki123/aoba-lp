@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useActionState, useEffect } from 'react'
+import { useState, useActionState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,6 +15,7 @@ export function ContactForm() {
   const [agreed, setAgreed] = useState(false)
   const router = useRouter()
   const [state, formAction, isPending] = useActionState(submitContact, initialState)
+  const idempotencyKey = useRef(typeof window !== 'undefined' ? crypto.randomUUID() : '')
 
   useEffect(() => {
     if (state.success && state.id) {
@@ -115,6 +116,9 @@ export function ContactForm() {
 
       {/* Honeypot — ボット対策 */}
       <input type="text" name="website" className="sr-only" tabIndex={-1} aria-hidden="true" />
+
+      {/* Idempotency Key — 重複送信対策 */}
+      <input type="hidden" name="idempotency_key" value={idempotencyKey.current} />
 
       <div className="flex items-start gap-3">
         <Checkbox

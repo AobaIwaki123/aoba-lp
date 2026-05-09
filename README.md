@@ -1,41 +1,51 @@
-# HP Project
+# Modern Corporate HP Sample
 
-Vercel + Neon を用いた商用グレードのコーポレートサイト。
+![Hero Screenshot Placeholder](https://via.placeholder.com/1200x630.png?text=Modern+Corporate+HP+Sample)
 
-## ドキュメント
+商用スケールのコーポレートサイト構築におけるベストプラクティスを凝縮したサンプルプロジェクトです。
+最新の PaaS/DaaS をフル活用し、エンタープライズ級の高可用性と、スタートアップに適したコストパフォーマンスを両立しています。
 
-| ドキュメント | 概要 |
-|---|---|
-| [要件定義書](docs/requirements.md) | 機能・非機能要件、制約条件 |
-| [アーキテクチャ設計書](docs/architecture.md) | システム構成、コンポーネント設計、データフロー |
-| [実装方針書](docs/implementation-guide.md) | ディレクトリ構造、コーディング規約、実装順序 |
-| [デザイン仕様書](docs/design.md) | 3コンセプト詳細、デザイントークン、A/Bテスト設計 |
-| [DB設計書](docs/database.md) | テーブル定義、インデックス、マイグレーション方針 |
-| [セキュリティ設計書](docs/security.md) | 脅威モデル、対策一覧、チェックリスト |
+## 🌟 特徴と強み
 
-## Quick Start
+### 1. マネージドサービス（PaaS/DaaS）の最適化
+Vercel, Neon (Serverless Postgres), Upstash (Redis), Resend などのモダンなインフラを組み合わせ、サーバー管理を一切不要に（Serverless）しながらも、堅牢でスケーラブルな基盤を実現。
 
-```bash
-# 依存関係インストール
-pnpm install
+### 2. 圧倒的なコストパフォーマンス
+各サービスの無料枠（Free Tier）を最大限に活用。スモールスタート時は**実質無料**で運用を開始でき、ビジネスの成長に合わせてシームレスにスケールアップが可能です。
 
-# 環境変数設定
-cp .env.example .env.local
+### 3. 先進的な A/B テスト基盤
+Next.js Middleware (Edge Runtime) によるゼロレイテンシな A/B テスト機能を搭載。3種類の異なるデザインコンセプトを即座に検証し、コンバージョン率の最適化を図ることができます。
 
-# DB マイグレーション
-pnpm db:migrate
+### 4. リッチなユーザー体験
+React Three Fiber による 3D 演出と Framer Motion によるアニメーションを統合。技術力の高さを視覚的に伝え、ユーザーに強い印象を残します。
 
-# 開発サーバー起動
-pnpm dev
-```
+## 📸 ギャラリー (プレースホルダー)
 
-## Tech Stack
+| Concept A (Minimal) | Concept B (Corporate) | Concept C (Creative) |
+|---|---|---|
+| ![Concept A Placeholder](https://via.placeholder.com/400x300.png?text=Concept+A) | ![Concept B Placeholder](https://via.placeholder.com/400x300.png?text=Concept+B) | ![Concept C Placeholder](https://via.placeholder.com/400x300.png?text=Concept+C) |
 
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript (strict mode)
-- **UI**: shadcn/ui + Tailwind CSS v4
-- **3D**: @react-three/fiber + @react-three/drei
-- **DB**: Neon (Serverless Postgres) + Drizzle ORM
-- **Form**: React Hook Form + Zod
-- **Animation**: Framer Motion
+## 🛠 テックスタック
+
+- **Framework**: Next.js 15 (App Router, Edge Runtime)
+- **Database**: Neon (Serverless Postgres) + Drizzle ORM
+- **Cache/Rate Limit**: Upstash Redis
+- **E-mail**: Resend
+- **Styling**: Tailwind CSS v4 + shadcn/ui
+- **3D/Animation**: React Three Fiber + Framer Motion
 - **Hosting**: Vercel
+
+## 📚 ドキュメント一覧
+
+詳細な設計思想や開発方法については、各ドキュメントを参照してください。
+
+- [🚀 Quick Start (開発用 README)](docs/README_DEV.md)
+- [📋 要件定義書](docs/requirements.md)
+- [🏗 アーキテクチャ設計書](docs/architecture.md)
+- [🎨 デザイン仕様書](docs/design.md)
+- [🗄 データベース設計書](docs/database.md)
+- [🛡 セキュリティ設計書](docs/security.md)
+
+## ⚖️ License
+
+MIT License

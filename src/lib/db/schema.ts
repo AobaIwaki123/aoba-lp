@@ -31,7 +31,7 @@ export const contactSubmissions = pgTable(
     ipAddress: varchar('ip_address', { length: 45 }),
     userAgent: varchar('user_agent', { length: 512 }),
     variant: abVariantEnum('variant'),
-    idempotencyKey: varchar('idempotency_key', { length: 36 }),
+    idempotencyKey: varchar('idempotency_key', { length: 36 }).unique(),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
@@ -55,9 +55,6 @@ export const contactSubmissions = pgTable(
     statusCreatedAtIdx: index('idx_status_created_at')
       .on(table.status, table.createdAt)
       .where(sql`${table.deletedAt} IS NULL`),
-    idempotencyKeyIdx: index('idx_idempotency_key')
-      .on(table.idempotencyKey)
-      .where(sql`${table.idempotencyKey} IS NOT NULL`),
   })
 )
 

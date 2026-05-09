@@ -220,10 +220,10 @@ export async function getActiveContacts() {
 
 **背景**: Drizzle ORM は UPDATE 時に `updated_at` を自動更新しない。DB トリガーで補完する。
 
+本プロジェクトでは、カスタムマイグレーションファイル (`drizzle/migrations/0001_add_updated_at_trigger.sql`) を作成し、`pnpm db:migrate` 時に自動的に適用されるように構成されています。
+
 ```sql
--- drizzle/migrations/0002_add_updated_at_trigger.sql
--- ⚠️ Drizzle Kit はトリガー・関数を自動生成しない。
---    pnpm db:migrate 後に Neon SQL Editor または psql で手動実行すること。
+-- drizzle/migrations/0001_add_updated_at_trigger.sql
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$

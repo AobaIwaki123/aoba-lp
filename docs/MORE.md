@@ -13,7 +13,7 @@
 |---|---|---|---|
 | 高 | **構造化ログ + 外部ログ転送** | セキュリティイベントを JSON 形式で Axiom / Datadog 等へ転送。Vercel ログの 30 日制限を超えたフォレンジック調査を可能にする。 | `requirements.md` / `security.md` |
 | 高 | **Neon バックアップ方針の明文化** | PITR 保持期間の確認・定期スナップショット取得手順を運用ドキュメント化する。 | `requirements.md` |
-| 高 | **DB の updated_at トリガー適用** | Drizzle Kit は自動生成しないため、Neon SQL Editor から直接トリガーを作成する。 | `database.md` §5b |
+| 完了 | **DB の updated_at トリガー適用** | カスタムマイグレーション (`0001_add_updated_at_trigger.sql`) として実装済み。 | `database.md` §5b |
 | 高 | **Cloudflare Turnstile 実装** | スパムボット対策。現在は Honeypot + レート制限で代替しているが、スパム増加確認時に前倒しで対応する。 | `requirements.md` / `security.md` |
 | 中 | **データ自動削除 Cron** | IP: 90日後 NULL 化 / spam レコード: 30日後物理削除 / 3年超レコード: ソフトデリート。Vercel Cron Jobs で実装。 | `database.md` §7 |
 | 中 | **CSP nonce 化** | 現在 `unsafe-eval` を Three.js のため許可しているが、nonce ベース CSP に移行して XSS リスクを低減する。 | `requirements.md` / `security.md` |
