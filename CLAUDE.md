@@ -102,6 +102,18 @@ pnpm test:e2e                # Playwright
 
 ---
 
+## Playwright MCP でスクリーンショットを撮るとき
+
+`filename` パラメータは必ず `screenshot/` プレフィックスを付ける。
+
+```
+filename: "screenshot/my-page.png"
+```
+
+`screenshot/` ディレクトリは `.gitignore` 済みのためリポジトリに含まれない。
+
+---
+
 ## やってはいけない / ハマりポイント
 
 - **API Route に Edge Runtime を使わない** — Neon 接続が切れる。Node.js runtime 固定（`requirements.md §4`）
