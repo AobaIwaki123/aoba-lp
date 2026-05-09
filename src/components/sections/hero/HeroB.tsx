@@ -52,17 +52,25 @@ export function HeroB({ config }: Props) {
             ハイクラス特化型
           </p>
           <h1
-            className="font-extrabold mb-6 leading-tight tracking-tighter"
+            className="heading-ja font-black mb-6"
             style={{
               fontSize: 'clamp(3rem, 6vw, 5rem)',
               color: isDesktop ? 'var(--color-text)' : '#ffffff',
+              lineHeight: 'var(--leading-hero)',
+              letterSpacing: 'var(--tracking-hero)',
+              maxWidth: 'var(--measure-hero)',
             }}
           >
             {config.heroHeadline}
           </h1>
           <p
-            className="text-lg mb-10 max-w-xl mx-auto md:mx-0 leading-relaxed"
-            style={{ color: isDesktop ? 'var(--color-text-muted)' : 'rgba(255,255,255,0.9)' }}
+            className="body-ja text-lg mb-10 mx-auto md:mx-0"
+            style={{ 
+              color: isDesktop ? 'var(--color-text-muted)' : 'rgba(255,255,255,0.9)',
+              lineHeight: 'var(--leading-body)',
+              letterSpacing: 'var(--tracking-body)',
+              maxWidth: 'var(--measure-prose)',
+            }}
           >
             {config.heroSubcopy}
           </p>

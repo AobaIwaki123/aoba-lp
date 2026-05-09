@@ -40,17 +40,25 @@ export function ServicesSection() {
     <section className="py-20" style={{ background: 'var(--color-bg)' }}>
       <div className="max-w-6xl mx-auto px-4">
         <h2
-          className="text-center font-bold mb-4"
+          className="heading-ja text-center font-bold mb-4 mx-auto"
           style={{
             fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
             color: 'var(--color-text)',
+            lineHeight: 'var(--leading-heading)',
+            letterSpacing: 'var(--tracking-heading)',
+            maxWidth: 'var(--measure-h2)',
           }}
         >
           サービスの特徴
         </h2>
         <p
-          className="text-center mb-10"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="body-ja text-center mb-10 mx-auto"
+          style={{ 
+            color: 'var(--color-text-muted)',
+            lineHeight: 'var(--leading-body)',
+            letterSpacing: 'var(--tracking-body)',
+            maxWidth: 'var(--measure-prose)',
+          }}
         >
           転職希望者と採用企業、両者に価値を提供します
         </p>

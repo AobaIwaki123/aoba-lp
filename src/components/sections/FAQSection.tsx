@@ -29,10 +29,13 @@ export function FAQSection() {
     <section className="py-20" style={{ background: 'var(--color-bg)' }}>
       <div className="max-w-2xl mx-auto px-4">
         <h2
-          className="text-center font-bold mb-12"
+          className="heading-ja text-center font-bold mb-12 mx-auto"
           style={{
             fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
             color: 'var(--color-text)',
+            lineHeight: 'var(--leading-heading)',
+            letterSpacing: 'var(--tracking-heading)',
+            maxWidth: 'var(--measure-h2)',
           }}
         >
           よくある質問

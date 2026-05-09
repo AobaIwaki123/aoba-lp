@@ -41,17 +41,25 @@ export function HeroC({ config }: Props) {
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
         <h1
-          className="font-extrabold mb-8 leading-tight tracking-tight"
+          className="heading-ja font-extrabold mb-8 mx-auto"
           style={{
             fontSize: 'clamp(2.25rem, 4.5vw, 3.5rem)',
             color: isDesktop ? 'var(--color-text)' : '#ffffff',
+            lineHeight: 'var(--leading-hero)',
+            letterSpacing: 'var(--tracking-hero)',
+            maxWidth: 'var(--measure-hero)',
           }}
         >
           {config.heroHeadline}
         </h1>
         <p
-          className="text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed"
-          style={{ color: isDesktop ? 'var(--color-text-muted)' : 'rgba(255,255,255,0.95)' }}
+          className="body-ja text-lg md:text-xl mb-12 mx-auto"
+          style={{ 
+            color: isDesktop ? 'var(--color-text-muted)' : 'rgba(255,255,255,0.95)',
+            lineHeight: 'var(--leading-body)',
+            letterSpacing: 'var(--tracking-body)',
+            maxWidth: 'var(--measure-prose)',
+          }}
         >
           {config.heroSubcopy}
         </p>

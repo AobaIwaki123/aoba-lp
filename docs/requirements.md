@@ -134,7 +134,7 @@
 | ホスティング | Vercel 固定 |
 | DB | Neon (Postgres) 固定 |
 | フロントエンド | React 必須 |
-| ランタイム | Node.js (Edge Runtime は DB 接続の都合上、API Route では使用しない) |
+| ランタイム | Node.js (Next.js 16 規約に従い proxy.ts でも使用) |
 | 無料枠 (Neon) | 0.5GB / 100 CU時間/月 |
 | 無料枠 (Upstash) | 10,000 リクエスト/日（レート制限用 Redis）|
 

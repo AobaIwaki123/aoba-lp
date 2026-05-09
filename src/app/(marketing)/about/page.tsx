@@ -58,17 +58,25 @@ export default function AboutPage() {
             Mission
           </p>
           <h1
-            className="font-extrabold mb-6 leading-snug"
+            className="heading-ja font-extrabold mb-6 mx-auto"
             style={{
               fontSize: 'clamp(2rem, 4vw, 3rem)',
               color: 'var(--color-text)',
+              lineHeight: 'var(--leading-hero)',
+              letterSpacing: 'var(--tracking-hero)',
+              maxWidth: 'var(--measure-hero)',
             }}
           >
             はたらく人の、<br />可能性を広げる。
           </h1>
           <p
-            className="text-lg leading-relaxed"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="body-ja text-lg mx-auto"
+            style={{ 
+              color: 'var(--color-text-muted)',
+              lineHeight: 'var(--leading-body)',
+              letterSpacing: 'var(--tracking-body)',
+              maxWidth: 'var(--measure-prose)',
+            }}
           >
             求人マッチングの民主化をミッションに、テクノロジーと人の力で
             最適な出会いを創出します。
@@ -116,10 +124,13 @@ export default function AboutPage() {
       >
         <div className="max-w-4xl mx-auto px-4">
           <h2
-            className="font-bold mb-14 text-center"
+            className="heading-ja font-bold mb-14 text-center mx-auto"
             style={{
               fontSize: 'clamp(1.5rem, 2.5vw, 2rem)',
               color: 'var(--color-text)',
+              lineHeight: 'var(--leading-heading)',
+              letterSpacing: 'var(--tracking-heading)',
+              maxWidth: 'var(--measure-h2)',
             }}
           >
             チーム

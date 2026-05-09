@@ -42,17 +42,25 @@ export default function ContactPage() {
             Contact
           </p>
           <h1
-            className="text-center font-extrabold mb-4"
+            className="heading-ja text-center font-extrabold mb-4 mx-auto"
             style={{
               fontSize: 'clamp(2rem, 4vw, 3rem)',
               color: 'var(--color-text)',
+              lineHeight: 'var(--leading-hero)',
+              letterSpacing: 'var(--tracking-hero)',
+              maxWidth: 'var(--measure-hero)',
             }}
           >
             お問い合わせ
           </h1>
           <p
-            className="text-center mb-12"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="body-ja text-center mb-12 mx-auto"
+            style={{ 
+              color: 'var(--color-text-muted)',
+              lineHeight: 'var(--leading-body)',
+              letterSpacing: 'var(--tracking-body)',
+              maxWidth: 'var(--measure-prose)',
+            }}
           >
             キャリアのご相談、採用に関するご質問など、お気軽にご連絡ください。
           </p>

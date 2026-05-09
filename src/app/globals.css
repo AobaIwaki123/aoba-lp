@@ -53,6 +53,20 @@
   --ring: oklch(0.708 0 0);
   /* default font fallback */
   --font-sans-resolved: var(--font-geist-sans);
+  
+  /* Font fallback stack for Japanese text */
+  --font-fallback-ja: "Hiragino Kaku Gothic Pro", "Hiragino Sans", "Meiryo", "MS PGothic", "Noto Sans CJK JP", sans-serif;
+
+  /* Typography tokens */
+  --leading-hero: 1.1;
+  --leading-heading: 1.2;
+  --leading-body: 1.75;
+  --tracking-hero: 0.02em;
+  --tracking-heading: 0.02em;
+  --tracking-body: 0.05em;
+  --measure-hero: 14em;
+  --measure-prose: 42ch;
+  --measure-h2: 20em;
 }
 
 /* ───────────────────────────

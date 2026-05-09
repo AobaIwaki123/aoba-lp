@@ -11,12 +11,22 @@ export function CTASection({ config }: Props) {
     >
       <div className="max-w-2xl mx-auto px-4">
         <h2
-          className="font-bold text-white mb-4"
-          style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)' }}
+          className="heading-ja font-bold text-white mb-4 mx-auto"
+          style={{ 
+            fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+            lineHeight: 'var(--leading-heading)',
+            letterSpacing: 'var(--tracking-heading)',
+            maxWidth: 'var(--measure-h2)',
+          }}
         >
           {config.ctaHeadline}
         </h2>
-        <p className="mb-10 leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>
+        <p className="body-ja mb-10 mx-auto" style={{ 
+          color: 'rgba(255,255,255,0.8)',
+          lineHeight: 'var(--leading-body)',
+          letterSpacing: 'var(--tracking-body)',
+          maxWidth: 'var(--measure-prose)',
+        }}>
           {config.ctaSubcopy}
         </p>
         <Link

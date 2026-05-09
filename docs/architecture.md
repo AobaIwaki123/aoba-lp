@@ -217,7 +217,7 @@ git push → GitHub Actions
 ### ADR-001: Server Actions vs API Routes
 
 **決定**: フォーム投稿は Server Actions を使用  
-**理由**: Next.js 15 での推奨パターン、CSRF トークン自動管理、プログレッシブエンハンスメント対応  
+**理由**: Next.js 16 での推奨パターン、CSRF トークン自動管理、プログレッシブエンハンスメント対応  
 **例外**: Webhook 受信など外部からの POST は API Routes を使用
 
 ### ADR-002: Drizzle ORM vs Prisma
