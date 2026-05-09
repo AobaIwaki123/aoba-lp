@@ -1090,8 +1090,8 @@ jobs:
 
 背景 PNG 生成の仕組みは設計済みだが、以下の実装が残っている。
 
-1. [ ] **OG プレビューページの作成**: `app/og/[variant]/page.tsx` の実装。
-2. [ ] **生成スクリプトの実装**: `scripts/generate-og-images.ts` の作成と `pnpm og:generate` コマンドの設定。
-3. [ ] **ImageResponse ルートの作成**: `app/api/og/route.tsx` でのテキスト合成処理の実装。
-4. [ ] **メタデータ統合**: `generateMetadata` を各ページに適用し、バリアント別の OG 画像 URL を設定する。
+1. [x] **OG プレビューページの作成**: `app/og/[variant]/page.tsx` の実装。
+2. [x] **生成スクリプトの実装**: `scripts/generate-og-images.ts` の作成と `pnpm og:generate` コマンドの設定。
+3. [x] **ImageResponse ルートの作成**: `app/api/og/route.tsx` でのテキスト合成処理の実装。
+4. [x] **メタデータ統合**: `generateMetadata` を各ページに適用し、バリアント別の OG 画像 URL を設定する。
 

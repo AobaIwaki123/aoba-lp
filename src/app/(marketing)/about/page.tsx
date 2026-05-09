@@ -1,6 +1,32 @@
-export const metadata = {
-  title: '会社について | Jobify',
-  description: 'はたらく人の可能性を広げることをミッションに、求人マッチングの民主化を目指します。',
+import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import type { Variant } from '@/lib/variants/types'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+  const title = '会社について'
+  const description = 'はたらく人の可能性を広げる。テクノロジーと人の力で最適な出会いを創出します。'
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{
+        url: `${siteUrl}/api/og?variant=${variant}&page=about`,
+        width: 1200,
+        height: 630,
+        alt: title,
+      }],
+    },
+    twitter: {
+      title,
+      description,
+      images: [`${siteUrl}/api/og?variant=${variant}&page=about`],
+    },
+  }
 }
 
 const company = [

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import type { Variant } from '@/lib/variants/types'
 import { variantConfig } from '@/lib/variants/config'
@@ -12,6 +13,32 @@ import { HowItWorksSection } from '@/components/sections/HowItWorksSection'
 import { TestimonialsSection } from '@/components/sections/TestimonialsSection'
 import { FAQSection } from '@/components/sections/FAQSection'
 import { CTASection } from '@/components/sections/CTASection'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant
+  const config = variantConfig[variant]
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+  return {
+    title: config.heroHeadline,
+    description: config.heroSubcopy.slice(0, 50) + '...',
+    openGraph: {
+      title: config.heroHeadline,
+      description: config.heroSubcopy.slice(0, 50) + '...',
+      images: [{
+        url: `${siteUrl}/api/og?variant=${variant}&page=home`,
+        width: 1200,
+        height: 630,
+        alt: config.heroHeadline,
+      }],
+    },
+    twitter: {
+      title: config.heroHeadline,
+      description: config.heroSubcopy.slice(0, 50) + '...',
+      images: [`${siteUrl}/api/og?variant=${variant}&page=home`],
+    },
+  }
+}
 
 export default async function LandingPage() {
   const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant

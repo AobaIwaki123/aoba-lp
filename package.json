@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest",
     "test:e2e": "playwright test",
+    "og:generate": "next build && next start & sleep 5 && npx tsx scripts/generate-og-images.ts && kill %1",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },

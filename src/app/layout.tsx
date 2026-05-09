@@ -23,26 +23,25 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-jakarta',
 })
-
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   title: {
-    default: '求人サービス | キャリアの可能性を広げる',
-    template: '%s | 求人サービス',
+    default: 'Jobify — AI × 人材マッチング',
+    template: '%s | Jobify',
   },
   description:
-    '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。専任のキャリアアドバイザーが転職活動を全面サポートします。',
+    '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。',
   openGraph: {
-    title: '求人サービス | キャリアの可能性を広げる',
-    description: '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com',
-    siteName: '求人サービス',
-    locale: 'ja_JP',
     type: 'website',
+    locale: 'ja_JP',
+    siteName: 'Jobify',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '求人サービス | キャリアの可能性を広げる',
-    description: '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 
