@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Navigation } from './Navigation'
 import { cn } from '@/lib/utils'
 
-export function Header() {
+export function Header({ primaryCta }: { primaryCta: string }) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function Header() {
             size="sm"
             className="bg-[--color-brand] text-white hover:bg-[--color-brand-dark]"
           >
-            <Link href="/contact">無料で相談する</Link>
+            <Link href="/contact">{primaryCta}</Link>
           </Button>
         </div>
 
