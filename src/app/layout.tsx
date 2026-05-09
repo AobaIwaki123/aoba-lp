@@ -24,7 +24,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
 })
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://aoba-lp.aooba.net'),
   title: {
     default: 'Jobify — AI × 人材マッチング',
     template: '%s | Jobify',

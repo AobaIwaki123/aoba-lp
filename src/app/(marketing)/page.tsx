@@ -17,17 +17,20 @@ import { CTASection } from '@/components/sections/CTASection'
 export async function generateMetadata(): Promise<Metadata> {
   const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant
   const config = variantConfig[variant]
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
   const v = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8) ?? 'dev'
 
   return {
     title: config.heroHeadline,
     description: config.heroSubcopy.slice(0, 50) + '...',
+    alternates: {
+      canonical: '/',
+    },
     openGraph: {
       title: config.heroHeadline,
       description: config.heroSubcopy.slice(0, 50) + '...',
+      url: '/',
       images: [{
-        url: `${siteUrl}/api/og?variant=${variant}&page=home&v=${v}`,
+        url: `/api/og?variant=${variant}&page=home&v=${v}`,
         width: 1200,
         height: 630,
         alt: config.heroHeadline,
@@ -36,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       title: config.heroHeadline,
       description: config.heroSubcopy.slice(0, 50) + '...',
-      images: [`${siteUrl}/api/og?variant=${variant}&page=home&v=${v}`],
+      images: [`/api/og?variant=${variant}&page=home&v=${v}`],
     },
   }
 }

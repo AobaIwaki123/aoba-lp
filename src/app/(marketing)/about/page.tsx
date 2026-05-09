@@ -4,7 +4,6 @@ import type { Variant } from '@/lib/variants/types'
 
 export async function generateMetadata(): Promise<Metadata> {
   const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
   const v = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 8) ?? 'dev'
   const title = '会社について'
   const description = 'はたらく人の可能性を広げる。テクノロジーと人の力で最適な出会いを創出します。'
@@ -12,11 +11,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: {
+      canonical: '/about',
+    },
     openGraph: {
       title,
       description,
+      url: '/about',
       images: [{
-        url: `${siteUrl}/api/og?variant=${variant}&page=about&v=${v}`,
+        url: `/api/og?variant=${variant}&page=about&v=${v}`,
         width: 1200,
         height: 630,
         alt: title,
@@ -25,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     twitter: {
       title,
       description,
-      images: [`${siteUrl}/api/og?variant=${variant}&page=about&v=${v}`],
+      images: [`/api/og?variant=${variant}&page=about&v=${v}`],
     },
   }
 }

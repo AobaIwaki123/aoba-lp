@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse(data, {
         headers: {
           'Content-Type': 'image/png',
+          'Content-Length': data.length.toString(),
           'Cache-Control': 'public, max-age=86400',
         },
       })
