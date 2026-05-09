@@ -6,8 +6,6 @@ const COLORS = { A: '#4f46e5', B: '#a855f7', C: '#d97706' } as const
 type Props = { currentVariant: string }
 
 export function VariantSwitcher({ currentVariant }: Props) {
-  if (process.env.NODE_ENV !== 'development') return null
-
   return (
     <div
       className="fixed right-4 top-1/2 -translate-y-1/2 z-[9999] flex flex-col gap-2"

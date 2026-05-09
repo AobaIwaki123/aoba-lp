@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <strong>環境変数を入力するだけで、本番環境が即座に立ち上がります。</strong>
+  <strong>1 クリックVercelにデプロイ可能 (連携SaaSへの登録は別途必要)</strong>
 </p>
 
 <p align="center">
