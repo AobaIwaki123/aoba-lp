@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <strong>1 クリックVercelにデプロイ可能 (連携SaaSへの登録は別途必要)</strong>
+  <strong>1 クリックでVercelにデプロイ可能 (連携SaaSへの登録は別途必要)</strong>
 </p>
 
 <p align="center">
