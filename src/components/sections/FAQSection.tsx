@@ -40,7 +40,7 @@ export function FAQSection() {
         >
           よくある質問
         </h2>
-        <Accordion type="single" collapsible>
+        <Accordion type="multiple">
           {faqs.map((faq, i) => (
             <AccordionItem key={i} value={`faq-${i}`}>
               <AccordionTrigger style={{ color: 'var(--color-text)' }}>

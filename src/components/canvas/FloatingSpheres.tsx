@@ -46,7 +46,7 @@ function Spheres() {
           <meshPhongMaterial 
             color={s.color} 
             transparent 
-            opacity={0.8}
+            opacity={0.35}
             shininess={100}
           />
         </mesh>

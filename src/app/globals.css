@@ -106,6 +106,17 @@
   --color-accent-brand:    #ec4899;
   --color-border-brand:    #3f3f46;
   --overlay-photo:         rgba(9, 9, 11, 0.6);
+
+  /* shadcn/ui dark mode tokens — フォーム入力が正しく描画されるよう上書き */
+  --background:            oklch(0.09 0 0);
+  --foreground:            oklch(0.98 0 0);
+  --card:                  oklch(0.13 0 0);
+  --card-foreground:       oklch(0.98 0 0);
+  --muted:                 oklch(0.21 0 0);
+  --muted-foreground:      oklch(0.70 0 0);
+  --border:                oklch(0.32 0 0);
+  --input:                 oklch(0.32 0 0);
+  --ring:                  oklch(0.65 0.24 302);
 }
 
 /* ───────────────────────────

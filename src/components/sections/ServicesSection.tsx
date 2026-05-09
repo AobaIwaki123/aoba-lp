@@ -62,7 +62,7 @@ export function ServicesSection() {
         >
           転職希望者と採用企業、両者に価値を提供します
         </p>
-        <Tabs defaultValue="jobseeker">
+        <Tabs defaultValue="jobseeker" className="flex-col">
           <TabsList className="mx-auto mb-10 flex w-fit">
             <TabsTrigger value="jobseeker">転職希望者の方</TabsTrigger>
             <TabsTrigger value="employer">採用企業の方</TabsTrigger>

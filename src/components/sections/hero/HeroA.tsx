@@ -80,17 +80,6 @@ export function HeroA({ config }: Props) {
           >
             {config.primaryCta}
           </Link>
-          <Link
-            href="/contact"
-            className="px-8 py-4 rounded-lg font-semibold text-base border transition-colors"
-            style={{
-              color: isDesktop ? 'var(--color-text)' : '#ffffff',
-              borderColor: isDesktop ? 'var(--color-border-brand)' : 'rgba(255,255,255,0.3)',
-              background: isDesktop ? 'transparent' : 'rgba(255,255,255,0.1)'
-            }}
-          >
-            {config.secondaryCta}
-          </Link>
         </div>
       </div>
     </section>

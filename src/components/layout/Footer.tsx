@@ -21,7 +21,7 @@ export function Footer() {
               <li key={href}>
                 <Link
                   href={href}
-                  className="text-sm text-[--color-text-muted] hover:text-[--color-text] transition-colors duration-200"
+                  className="text-base text-[--color-text-muted] hover:text-[--color-text] transition-colors duration-200"
                 >
                   {label}
                 </Link>
@@ -30,7 +30,7 @@ export function Footer() {
           </ul>
         </nav>
 
-        <p className="text-xs text-[--color-text-muted]">
+        <p className="text-sm text-[--color-text-muted]">
           &copy; {new Date().getFullYear()} Jobify. All rights reserved.
         </p>
       </div>
