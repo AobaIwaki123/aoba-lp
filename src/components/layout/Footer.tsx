@@ -15,8 +15,8 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-10 text-center space-y-6">
         <p className="font-bold text-xl text-[--color-text]">Jobify</p>
 
-        <nav aria-label="フッターナビゲーション">
-          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+        <nav aria-label="フッターナビゲーション" className="w-fit mx-auto">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2">
             {FOOTER_LINKS.map(({ href, label }) => (
               <li key={href}>
                 <Link
