@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/og/variant-a-bg.png" alt="Aoba LP hero" width="100%" />
+  <img src="img/image.png" alt="Aoba LP hero" width="100%" />
 </p>
 
 <h1 align="center">Aoba LP</h1>
@@ -25,7 +25,6 @@
     <img src="https://vercel.com/button" alt="Deploy with Vercel" height="36" />
   </a>
   &nbsp;&nbsp;
-  <a href="#クイックスタート">ローカルで試す →</a>
 </p>
 
 ---
@@ -34,7 +33,7 @@
 
 | | |
 |---|---|
-| **Free Tier で始められる** | Vercel・Neon・Upstash・Resend の無料枠を活用。月額ゼロ円からスタートし、トラフィックに応じてシームレスにスケール |
+| **Free Tier で始められる** | Vercel・Neon・Upstash・Resend の無料枠を活用。無料枠からスモールスタートし、事業成長に応じてシームレスにスケール可能 |
 | **フォーム投稿が本番品質** | 問い合わせを DB 保存 → 管理者メール通知 → 投稿者への自動返信 → Slack 通知まで一気通貫。レート制限・冪等性キー・メールアドレス正規化済み |
 | **A/B テストを内蔵** | Edge Runtime による Cookie ベースの振り分けで 3 種類のデザインコンセプトを即時切り替え。ゼロレイテンシ |
 | **サーバー管理ゼロ** | Vercel（ホスティング）+ Neon（Serverless Postgres）+ Upstash（Serverless Redis）により、インフラ運用を完全アウトソース |

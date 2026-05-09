@@ -118,6 +118,7 @@
     <button class="btn-variant active" data-variant="A">Variant A — Particles</button>
     <button class="btn-variant"        data-variant="B">Variant B — Rings</button>
     <button class="btn-variant"        data-variant="C">Variant C — Spheres</button>
+    <button class="btn-variant"        data-variant="README">README Banner</button>
   </div>
 
   <div class="row">
@@ -212,6 +213,28 @@
           eyebrow:  'AI × 人材マッチング',
           headline: 'あなたの可能性を、一緒に広げよう。',
           subcopy:  '一人ひとりに寄り添い、あなたらしいキャリアを一緒に考えます。',
+        },
+      },
+      README: {
+        shape:         'grid',
+        colors:        [0x00d084, 0x00b4d8, 0x64ffda, 0xa8ff78, 0x00ff88, 0x22d3ee, 0x34d399],
+        bgTopBase:     [0.04, 0.12, 0.10],
+        bgBottomBase:  [0.02, 0.06, 0.05],
+        keyColor:      0x00d084,
+        fillColor:     0x00b4d8,
+        vigRgb:        '4,10,8',
+        accent1:       '#00d084',
+        accent2:       '#00b4d8',
+        eyebrowColor:  '#00d084',
+        glowColor:     'rgba(0,208,132,0.35)',
+        themeColor:    '#00d084',
+        countLabel:    '形状数',
+        countMin: 2, countMax: 8, countDefault: 4,
+        opacityDefault: 60,
+        copy: {
+          eyebrow:  'Next.js · TypeScript · Three.js · Tailwind · Vercel',
+          headline: 'modern-hp',
+          subcopy:  'コーポレートHP — A/Bテスト × 3D演出 × フォーム受付',
         },
       },
     };
@@ -359,11 +382,83 @@
       }
     }
 
+    // ── README: Perspective grid + wireframe polyhedra ───────────────────────
+    function buildGrid() {
+      const count   = parseInt(document.getElementById('obj-count').value);
+      const opacity = parseInt(document.getElementById('obj-opacity').value) / 100;
+      const colors  = currentTheme.colors;
+
+      // Floor grid
+      const grid = new THREE.GridHelper(60, 36, colors[0], colors[1]);
+      grid.position.y = -7;
+      grid.material.transparent = true;
+      grid.material.opacity = opacity * 0.5;
+      scene.add(grid);
+      sceneObjects.push(grid);
+      animData.push({ type: 'grid' });
+
+      // Wireframe polyhedra
+      const geoFns = [
+        () => new THREE.IcosahedronGeometry(1.6, 1),
+        () => new THREE.OctahedronGeometry(1.3),
+        () => new THREE.DodecahedronGeometry(1.1),
+        () => new THREE.IcosahedronGeometry(0.9, 0),
+        () => new THREE.OctahedronGeometry(0.7),
+        () => new THREE.IcosahedronGeometry(2.0, 1),
+        () => new THREE.DodecahedronGeometry(0.6),
+        () => new THREE.OctahedronGeometry(1.8),
+      ];
+
+      for (let i = 0; i < count; i++) {
+        const geo   = geoFns[i % geoFns.length]();
+        const edges = new THREE.EdgesGeometry(geo);
+        const mesh  = new THREE.LineSegments(
+          edges,
+          new THREE.LineBasicMaterial({ color: colors[i % colors.length], transparent: true, opacity })
+        );
+        mesh.position.set(
+          (Math.random() - 0.5) * 22,
+          (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 8 - 2
+        );
+        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        scene.add(mesh);
+        sceneObjects.push(mesh);
+        animData.push({
+          type: 'wireframe',
+          rx: (Math.random() - 0.5) * 0.007,
+          ry: (Math.random() - 0.5) * 0.007,
+          rz: (Math.random() - 0.5) * 0.004,
+        });
+      }
+
+      // Scanline particles floating above grid
+      const pCount = 120;
+      const pPos   = new Float32Array(pCount * 3);
+      const pCol   = new Float32Array(pCount * 3);
+      const palette = colors.map(c => new THREE.Color(c));
+      for (let i = 0; i < pCount; i++) {
+        pPos[i*3]   = (Math.random() - 0.5) * 30;
+        pPos[i*3+1] = Math.random() * 10 - 6;
+        pPos[i*3+2] = (Math.random() - 0.5) * 14;
+        const c = palette[i % palette.length];
+        pCol[i*3] = c.r; pCol[i*3+1] = c.g; pCol[i*3+2] = c.b;
+      }
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+      pGeo.setAttribute('color',    new THREE.BufferAttribute(pCol, 3));
+      const pts = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.07, vertexColors: true, transparent: true, opacity: opacity * 0.7, sizeAttenuation: true }));
+      scene.add(pts);
+      sceneObjects.push(pts);
+      animData.push({ type: 'particles' });
+    }
+
     function buildScene() {
       clearScene();
       const shape = currentTheme.shape;
       if (shape === 'particles') buildParticles();
       else if (shape === 'rings') buildRings();
+      else if (shape === 'grid') buildGrid();
       else buildSpheres();
     }
     buildScene();
@@ -379,10 +474,15 @@
           obj.rotation.x += d.rx;
           obj.rotation.y += d.ry;
           obj.rotation.z += d.rz;
+        } else if (d.type === 'wireframe') {
+          obj.rotation.x += d.rx;
+          obj.rotation.y += d.ry;
+          obj.rotation.z += d.rz;
         } else if (d.type === 'particles') {
-          // Gentle drift: shift the whole points group
           obj.rotation.y += 0.0008;
           obj.rotation.x += 0.0003;
+        } else if (d.type === 'grid') {
+          // static
         }
       });
     }
@@ -470,12 +570,124 @@
       ctx.restore();
     }
 
+    function compositeReadme() {
+      renderer.render(scene, camera);
+      ctx.drawImage(threeCanvas, 0, 0);
+
+      const vig = currentTheme.vigRgb;
+
+      // Full dark overlay — lighter than OG so grid shows through
+      ctx.fillStyle = `rgba(${vig},0.55)`;
+      ctx.fillRect(0, 0, W, H);
+
+      // Top/bottom vignette
+      const vV = ctx.createLinearGradient(0, 0, 0, H);
+      vV.addColorStop(0,   `rgba(${vig},0.7)`);
+      vV.addColorStop(0.3, `rgba(${vig},0)`);
+      vV.addColorStop(0.7, `rgba(${vig},0)`);
+      vV.addColorStop(1,   `rgba(${vig},0.75)`);
+      ctx.fillStyle = vV; ctx.fillRect(0, 0, W, H);
+
+      const th = currentTheme;
+      const eyebrow  = document.getElementById('eyebrow').value.trim();
+      const headline = document.getElementById('headline').value.trim();
+      const subcopy  = document.getElementById('subcopy').value.trim();
+      const CX = W / 2;
+
+      // Stack line (eyebrow) — monospace, top center
+      ctx.save();
+      ctx.font = '500 16px "SF Mono","Fira Code",Consolas,monospace';
+      ctx.fillStyle = th.eyebrowColor;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.globalAlpha = 0.75;
+      ctx.fillText(eyebrow, CX, 220);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // Accent line below stack
+      ctx.save();
+      const barG = ctx.createLinearGradient(CX - 100, 0, CX + 100, 0);
+      barG.addColorStop(0, 'rgba(0,208,132,0)');
+      barG.addColorStop(0.5, th.accent1);
+      barG.addColorStop(1, 'rgba(0,180,216,0)');
+      ctx.fillStyle = barG;
+      ctx.fillRect(CX - 100, 238, 200, 2);
+      ctx.restore();
+
+      // Headline — large, centered, monospace for tech feel
+      ctx.save();
+      ctx.font = '900 96px "SF Mono","Fira Code",Consolas,system-ui,monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.shadowColor = th.glowColor; ctx.shadowBlur = 36;
+      // Gradient text via clip
+      const textGrad = ctx.createLinearGradient(CX - 250, 0, CX + 250, 0);
+      textGrad.addColorStop(0, '#ffffff');
+      textGrad.addColorStop(0.5, th.accent1);
+      textGrad.addColorStop(1, th.accent2);
+      ctx.fillStyle = textGrad;
+      ctx.fillText(headline, CX, 360);
+      ctx.restore();
+
+      // Subcopy — centered
+      ctx.save();
+      ctx.font = '400 22px system-ui,sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(subcopy, CX, 410);
+      ctx.restore();
+
+      // Bottom: tech badge chips
+      const badges = ['Next.js 16', 'TypeScript', 'Three.js', 'Tailwind v4', 'Neon', 'Vercel'];
+      const badgeFont = '500 14px "SF Mono","Fira Code",monospace';
+      ctx.font = badgeFont;
+      const totalW = badges.reduce((s, b) => s + ctx.measureText(b).width + 28, 0) + (badges.length - 1) * 10;
+      let bx = CX - totalW / 2;
+      const by = H - 72;
+      badges.forEach((label, i) => {
+        ctx.save();
+        ctx.font = badgeFont;
+        const tw = ctx.measureText(label).width;
+        const bw = tw + 28, bh = 28, br = 14;
+        // pill background
+        ctx.beginPath();
+        ctx.moveTo(bx + br, by); ctx.lineTo(bx + bw - br, by);
+        ctx.arcTo(bx + bw, by, bx + bw, by + br, br);
+        ctx.lineTo(bx + bw, by + bh - br);
+        ctx.arcTo(bx + bw, by + bh, bx + bw - br, by + bh, br);
+        ctx.lineTo(bx + br, by + bh);
+        ctx.arcTo(bx, by + bh, bx, by + bh - br, br);
+        ctx.lineTo(bx, by + br);
+        ctx.arcTo(bx, by, bx + br, by, br);
+        ctx.closePath();
+        const hex = currentTheme.colors[i % currentTheme.colors.length];
+        const cr = (hex >> 16) & 0xff, cg = (hex >> 8) & 0xff, cb = hex & 0xff;
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},0.12)`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.45)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = `rgba(${cr},${cg},${cb},0.9)`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(label, bx + bw / 2, by + bh / 2);
+        ctx.restore();
+        bx += bw + 10;
+      });
+
+      // URL bottom right
+      ctx.save();
+      ctx.font = '400 15px "SF Mono","Fira Code",monospace';
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText('aooba.net', W - 64, H - 36);
+      ctx.restore();
+    }
+
     // ── Animation loop ────────────────────────────────────────────────────────
     let frozen = false, t = 0;
     function animate() {
       requestAnimationFrame(animate);
       if (!frozen) { t += 0.016; animateScene(t); }
-      composite();
+      activeVariant === 'README' ? compositeReadme() : composite();
     }
     animate();
 
@@ -540,7 +752,7 @@
       document.getElementById('btn-freeze').textContent = '▶ Play';
       composite();
       const link = document.createElement('a');
-      link.download = `og-image-variant-${activeVariant.toLowerCase()}.png`;
+      link.download = activeVariant === 'README' ? 'readme-banner.png' : `og-image-variant-${activeVariant.toLowerCase()}.png`;
       link.href = output.toDataURL('image/png');
       link.click();
     });
