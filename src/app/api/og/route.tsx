@@ -1,15 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 
-export const runtime = 'nodejs'  // fs.readFileSync のため Node.js runtime 必須
-
-const VARIANT_BG: Record<string, string> = {
-  A: '/og/variant-a-bg.png',
-  B: '/og/variant-b-bg.png',
-  C: '/og/variant-c-bg.png',
-}
+export const runtime = 'nodejs'
 
 const PAGE_META: Record<string, { title: string; description: string }> = {
   home:    { title: '人と企業の、最適な出会いを。', description: 'AI × 人材マッチングサービス Jobify' },
@@ -23,22 +15,22 @@ export async function GET(req: NextRequest) {
   const page = searchParams.get('page') ?? 'home'
 
   const meta = PAGE_META[page] ?? PAGE_META.home
-  const bgPath = path.join(process.cwd(), 'public', VARIANT_BG[variant] ?? VARIANT_BG.A)
+  const variantLower = variant.toLowerCase()
   
-  let bgData = ''
+  let bgSrc: ArrayBuffer | null = null
   try {
-    bgData = `data:image/png;base64,${fs.readFileSync(bgPath).toString('base64')}`
+    const bgUrl = new URL(`../../../../public/og/variant-${variantLower}-bg.png`, import.meta.url)
+    bgSrc = await fetch(bgUrl).then((res) => res.arrayBuffer())
   } catch (error) {
-    console.warn(`Could not read background image at ${bgPath}. Using empty background.`)
+    console.warn('Could not read background image.', error)
   }
 
-  // 日本語フォント読み込み
-  const fontPath = path.join(process.cwd(), 'public/fonts/NotoSansJP-Bold.ttf')
-  let fontData: Buffer | null = null
+  let fontData: ArrayBuffer | null = null
   try {
-    fontData = fs.readFileSync(fontPath)
+    const fontUrl = new URL('../../../../public/fonts/NotoSansJP-Bold.ttf', import.meta.url)
+    fontData = await fetch(fontUrl).then((res) => res.arrayBuffer())
   } catch (error) {
-    console.warn(`Could not read font file at ${fontPath}. Text might not render correctly.`)
+    console.warn('Could not read font file.', error)
   }
 
   const textColor = variant === 'C' ? '#1c1917' : '#ffffff'
@@ -60,7 +52,10 @@ export async function GET(req: NextRequest) {
     (
       <div style={{ width: 1200, height: 630, position: 'relative', display: 'flex' }}>
         {/* 背景 PNG */}
-        {bgData && <img src={bgData} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />}
+        {bgSrc && (
+          // @ts-expect-error Satori accepts ArrayBuffer for src
+          <img src={bgSrc} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+        )}
         {/* テキスト */}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
                       justifyContent: 'center', padding: '0 80px', color: textColor }}>
