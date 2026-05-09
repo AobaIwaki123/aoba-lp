@@ -1,5 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
+import fs from 'fs'
+import path from 'path'
 
 export const runtime = 'nodejs'
 
@@ -19,16 +21,16 @@ export async function GET(req: NextRequest) {
   
   let bgSrc: ArrayBuffer | null = null
   try {
-    const bgUrl = new URL(`../../../../public/og/variant-${variantLower}-bg.png`, import.meta.url)
-    bgSrc = await fetch(bgUrl).then((res) => res.arrayBuffer())
+    const bgPath = path.join(process.cwd(), 'public', 'og', `variant-${variantLower}-bg.png`)
+    bgSrc = fs.readFileSync(bgPath).buffer as ArrayBuffer
   } catch (error) {
     console.warn('Could not read background image.', error)
   }
 
   let fontData: ArrayBuffer | null = null
   try {
-    const fontUrl = new URL('../../../../public/fonts/NotoSansJP-Bold.ttf', import.meta.url)
-    fontData = await fetch(fontUrl).then((res) => res.arrayBuffer())
+    const fontPath = path.join(process.cwd(), 'public', 'fonts', 'NotoSansJP-Bold.ttf')
+    fontData = fs.readFileSync(fontPath).buffer as ArrayBuffer
   } catch (error) {
     console.warn('Could not read font file.', error)
   }
