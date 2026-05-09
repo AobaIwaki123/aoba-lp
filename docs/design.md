@@ -622,33 +622,35 @@ export function FAQSection() {
 初回アクセス
      │
      ▼
-middleware.ts
-  バリアントCookieなし？
-     │ Yes
-     ▼
-  ランダム割り当て (A/B/C 各33%)
-  Cookie: variant=A|B|C
-  maxAge: 30日
-     │
-     ▼
-RSC page.tsx
-  cookies().get('variant') → 'A'
-     │
-     ▼
-  <LandingPage variant="A" />
-  <html data-variant="A">
+src/proxy.ts（Next.js 新ファイル規約。旧 middleware.ts に相当）
+  バリアント Cookie なし？
+         │ Yes
+         ▼
+       ?__variant=X クエリあり？
+         │ Yes → Cookie に強制セット（QA 用、maxAge: 30日）
+         │ No  → ACTIVE_VARIANTS からランダム割り当て（現在: A / C 50%ずつ）
+         │       Cookie: variant=A|C, maxAge: 30日, httpOnly
+         ▼
+RSC app/layout.tsx
+  cookies().get('variant')?.value ?? 'A'
+  → <html data-variant="A|B|C">
+
+RSC app/(marketing)/page.tsx
+  cookies().get('variant')?.value ?? 'A'
+  → variantConfig[variant] を取得
+  → 対応する Hero コンポーネントをレンダリング
 ```
 
-### 7.2 ファイル構成（A/B テスト対応追加分）
+### 7.2 ファイル構成（A/B テスト対応）
 
 ```
 src/
-├── middleware.ts                        # バリアント Cookie 割り当て
+├── proxy.ts                             # バリアント Cookie 割り当て（Next.js 新ファイル規約。旧 middleware.ts）
 │
 ├── lib/
 │   └── variants/
-│       ├── types.ts                     # export type Variant = 'A' | 'B' | 'C'
-│       └── config.ts                    # バリアントごとの機能フラグ
+│       ├── types.ts                     # Variant 型（RSC / Server Action 用。DB enum から派生）
+│       └── config.ts                    # バリアントごとの設定値（VariantConfig 型）
 │
 └── components/
     ├── sections/
@@ -662,49 +664,76 @@ src/
         └── FloatingSpheres.tsx          # Concept C 専用
 ```
 
+> **proxy.ts と types.ts の Next.js 16 の proxy.ts は Node.js runtime で動作するため、@/lib/db/schema から AbVariant 型を直接インポートして使用する。これにより型定義の二重管理を回避する。
+
 ### 7.3 実装パターン
 
 ```typescript
-// lib/variants/types.ts
-// pgEnum を唯一の source of truth にする。
-// VARIANTS 配列はランタイムで使う値として pgEnum から直接取得し、
-// Variant 型はその配列から派生させる（独立した string literal 定義は持たない）。
-import { abVariantEnum } from '@/lib/db/schema'
+// src/proxy.ts（Next.js 新ファイル規約。旧 middleware.ts に相当）
 
-export const VARIANTS = abVariantEnum.enumValues  // ['A', 'B', 'C']
-export type Variant = typeof VARIANTS[number]
+import type { AbVariant as Variant } from '@/lib/db/schema'
+const VARIANTS: Variant[] = ['A', 'B', 'C']
 
-// lib/variants/config.ts
-export const variantConfig: Record<Variant, {
-  show3D: boolean
-  font: string
-  primaryCta: string
-  ctaHeadline: string
-}> = {
-  A: { show3D: true, font: 'Inter',             primaryCta: '無料で相談する',      ctaHeadline: 'まず、話してみませんか。' },
-  B: { show3D: true, font: 'Geist',             primaryCta: '今すぐ始める',        ctaHeadline: '今が、動くタイミングだ。' },
-  C: { show3D: true, font: 'Plus Jakarta Sans', primaryCta: 'まずは話を聞いてみる', ctaHeadline: '一緒に、次のステップを考えよう。' },
-}
-
-// middleware.ts
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const res = NextResponse.next()
-  if (!request.cookies.get('variant')) {
-    const v = VARIANTS[Math.floor(Math.random() * VARIANTS.length)]
-    res.cookies.set('variant', v, { maxAge: 60 * 60 * 24 * 30, httpOnly: true })
+
+  // QA 用: ?__variant=A で強制表示（Cookie を上書き）
+  const forced = request.nextUrl.searchParams.get('__variant') as Variant | null
+  if (forced && (VARIANTS as string[]).includes(forced)) {
+    res.cookies.set('variant', forced, { maxAge: 60 * 60 * 24 * 30, httpOnly: true, path: '/' })
+    return res
   }
+
+  // 初回アクセス時のみランダム割り当て
+  if (!request.cookies.get('variant')) {
+    const ACTIVE_VARIANTS: Variant[] = ['A', 'C']  // Phase 2 で ['A', 'B', 'C'] に変更
+    const v = ACTIVE_VARIANTS[Math.floor(Math.random() * ACTIVE_VARIANTS.length)]
+    res.cookies.set('variant', v, { maxAge: 60 * 60 * 24 * 30, httpOnly: true, path: '/' })
+  }
+
   return res
 }
 
-// app/(marketing)/page.tsx (RSC)
-export default async function Page() {
-  const variant = (await cookies()).get('variant')?.value as Variant ?? 'A'
-  return <LandingPage variant={variant} />
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'],
+}
+
+// lib/variants/types.ts（RSC / Server Action 用）
+// pgEnum を source of truth にし、Variant 型を派生させる
+import { abVariantEnum } from '@/lib/db/schema'
+export const VARIANTS = abVariantEnum.enumValues  // ['A', 'B', 'C']
+export type Variant = (typeof VARIANTS)[number]
+
+// lib/variants/config.ts（実際のフィールドは以下の通り）
+export type VariantConfig = {
+  show3D: boolean
+  font: string
+  heroHeadline: string
+  heroSubcopy: string
+  primaryCta: string
+  secondaryCta: string
+  ctaHeadline: string
+  ctaSubcopy: string
+  mobileGradient: string  // モバイル時の 3D 代替グラデーション
+}
+
+// app/(marketing)/page.tsx（RSC）
+export default async function LandingPage() {
+  const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant
+  const config = variantConfig[variant]
+  return (
+    <>
+      {variant === 'A' && <HeroA config={config} />}
+      {variant === 'B' && <HeroB config={config} />}
+      {variant === 'C' && <HeroC config={config} />}
+      {/* 共通セクション */}
+    </>
+  )
 }
 
 // app/layout.tsx
 export default async function RootLayout({ children }) {
-  const variant = (await cookies()).get('variant')?.value ?? 'A'
+  const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant
   return <html lang="ja" data-variant={variant}>...</html>
 }
 ```
@@ -717,38 +746,26 @@ export default async function RootLayout({ children }) {
 - コンバージョン率 = バリアント別の投稿件数 / セッション数（将来: page_views テーブル追加）
 - 判定: 最低4週間 / バリアントあたり30件の投稿で統計的有意性を確認
 
-**勝者決定後**: middleware で1バリアントに固定し、負けたバリアントのコードは削除する。
+**勝者決定後**: `proxy.ts` の `ACTIVE_VARIANTS` を勝者1バリアントに固定し、負けたバリアントのコードは削除する。
 
-### 7.5 Vercel ダッシュボードでのバリアント強制確認
+### 7.5 バリアント強制確認（開発・QA）
 
 ```
-?__variant=A  →  開発・QA 用に特定バリアントを強制表示（middleware で対応）
+?__variant=A  →  特定バリアントを強制表示（proxy.ts 実装済み）
+?__variant=B
+?__variant=C
 ```
 
-```typescript
-// middleware.ts に追加
-const forced = request.nextUrl.searchParams.get('__variant') as Variant | null
-if (forced && VARIANTS.includes(forced)) {
-  res.cookies.set('variant', forced, { maxAge: 60 * 60 })
-}
-```
+Cookie が上書きされるため、以降のアクセスでも強制バリアントが維持される（maxAge: 30日）。
 
-### 7.6 A/B テスト MVP 推奨プラン（2バリアントから開始）
+### 7.6 A/B テスト MVP プラン（現在: Phase 1 実施中）
 
-3バリアント同時実施はサンプル収集期間が3倍かかる。初回リリースは**A vs C の2バリアント**から始め、勝者確定後に B を加えた第2フェーズに移行することを推奨する。
-
-| フェーズ | バリアント | 狙い |
+| フェーズ | バリアント | 状態 |
 |---|---|---|
-| Phase 1（4〜8週間） | A: CONNECTED vs C: HUMAN | コントラストが最大（明度・トーン・3D表現すべて異なる）。「信頼×知性」vs「温かみ×寄り添い」の優劣を早期検証 |
-| Phase 2（勝者確定後） | 勝者 vs B: BOLD | ダークモード・ハイクラス訴求の有効性を追加検証 |
+| Phase 1（4〜8週間） | A: CONNECTED vs C: HUMAN | **実施中**（proxy.ts の ACTIVE_VARIANTS = ['A', 'C']） |
+| Phase 2（勝者確定後） | 勝者 vs B: BOLD | 未着手 |
 
-**MVP 切り替え方法**: Phase 1 では `VARIANTS` を `['A', 'C']` に絞り、middleware の割り当てを50/50にする。
-
-```typescript
-// middleware.ts — Phase 1 設定
-const ACTIVE_VARIANTS: Variant[] = ['A', 'C']  // Phase 2 で ['A', 'B', 'C'] に戻す
-const v = ACTIVE_VARIANTS[Math.floor(Math.random() * ACTIVE_VARIANTS.length)]
-```
+**Phase 2 への切り替え方法**: `src/proxy.ts` の `ACTIVE_VARIANTS` を `['A', 'B', 'C']` に変更するだけ。
 
 **計測変数一覧** (Phase 1):
 | 変数 | A | C |
@@ -758,3 +775,228 @@ const v = ACTIVE_VARIANTS[Math.floor(Math.random() * ACTIVE_VARIANTS.length)]
 | Primary CTA | 「無料で相談する」 | 「まずは話を聞いてみる」 |
 | 3D 演出 | Particle Network（つながり） | Floating Spheres（有機的） |
 | フォント | Inter | Plus Jakarta Sans |
+
+---
+
+## 8. タイポグラフィ詳細仕様（AI 実装制約）
+
+> このセクションは AI への実装指示として機能する。§3〜§5 のサイズ・ウェイト表と合わせて読むこと。
+> 「どう見えるか」という視覚的意図を明示することで、AIが適切な CSS 値を選べるようにする。
+
+### 8.1 全プロパティ一覧（コンセプト共通）
+
+| 役割 | size | weight | line-height | letter-spacing | max-width |
+|---|---|---|---|---|---|
+| Hero H1 | §3〜§5 参照 | §3〜§5 参照 | `1.1` | `0.02em` | `14em`（約14文字で折り返す） |
+| Section H2 | §3〜§5 参照 | §3〜§5 参照 | `1.2` | `0.02em` | `20em` |
+| Card H3 | `1.25rem` | `600` | `1.3` | `0.01em` | 制限なし |
+| Body | `1rem` | `400` | `1.75` | `0.05em` | `42ch`（日本語で約30〜35文字） |
+| Caption | `0.875rem` | `400` | `1.6` | `0.05em` | 制限なし |
+| Button | `0.9375rem` | `600` | `1` | `0.02em` | 制限なし |
+
+> **letter-spacing の考え方**: このプロジェクトの見出しフォント（Inter / Geist / Plus Jakarta Sans）は欧文フォントで、日本語は OS フォールバック（Hiragino / Meiryo）で描画される。CSS の `letter-spacing` は両者に同じ値が適用されるため、欧文の「大サイズで詰める」ルールを適用すると日本語部分が詰まりすぎる。日本語テキストが主体の場合は `0` または正値が正しい。欧文のみの要素（ロゴ・全角英数字なし）は別途 `-0.02em` を指定してよい。
+
+**視覚的意図（なぜこの値か）**:
+
+- **Hero H1 の line-height: 1.1** — 見出しを「塊」として視覚的にまとめる。1.4 以上だと行間が間延びして迫力が失われる
+- **Hero H1 の letter-spacing: 0.02em** — 日本語全角文字の字間を微開きにして可読性を上げる。W3C JLREQ 推奨
+- **Hero H1 の max-width: 14em** — 日本語 H1 は 1 行あたり 10〜14 文字が理想。それ以上はスキャンが難しくなる
+- **Body の max-width: 42ch** — `ch` 単位は欧文フォントの "0" 幅基準。Inter / Geist 使用時は 1ch ≒ 0.6em のため、42ch ≒ 約 672px ≒ 日本語 30〜35 文字相当。JLREQ 推奨の 30〜40 文字に収まる
+- **Body の line-height: 1.75** — 日本語本文は欧文より行間を広く取る。W3C JLREQ が 1.5〜1.6 以上を推奨。1.5 以下だと窮屈に見える
+
+### 8.2 フォントウェイトの使い方
+
+| weight | Tailwind クラス | 視覚的役割 | 使う場面 |
+|---|---|---|---|
+| 400 | `font-normal` | 通常の文章の太さ | Body、Caption、説明文 |
+| 500 | `font-medium` | やや強調。太く「見えない」 | UI ラベル、ナビリンク |
+| 600 | `font-semibold` | 明確に太い。見出し感が出る | Card H3、ボタン、タブ |
+| 700 | `font-bold` | 強い強調。セクションの軸になる | Section H2 |
+| 800 | `font-extrabold` | 最大の視覚的インパクト | Hero H1（コンセプト A・C）|
+| 900 | `font-black` | 黒板に書いたような圧力感 | Hero H1（コンセプト B のみ）|
+
+**禁止パターン**:
+- Body テキストに `font-bold` (700) 以上を使わない。部分強調は `font-semibold` (600) まで
+- H1 に `font-bold` (700) を使わない。800 か 900 を使うこと（スケールの意味を保つ）
+- ボタンラベルに `font-normal` を使わない（クリッカブルに見えない）
+
+### 8.3 日本語テキスト固有のルール
+
+```css
+/* 日本語見出しに必ず適用する */
+.heading-ja {
+  text-wrap: balance;        /* 途中で不自然に折り返すのを防ぐ */
+  word-break: keep-all;      /* 単語の途中で改行させない */
+  overflow-wrap: break-word; /* 折り返せない長い語だけ許可 */
+}
+
+/* 本文 */
+.body-ja {
+  text-wrap: pretty;  /* 最終行が短くなりすぎるのを防ぐ */
+  hanging-punctuation: allow-end; /* 句読点のぶら下がり */
+}
+```
+
+**禁止パターン**:
+- 見出しに `text-wrap: wrap`（デフォルト）を使わない。必ず `balance` を指定する
+- `white-space: nowrap` を H1/H2 に使わない（モバイルでオーバーフローする）
+- 日本語テキストを含む要素に `letter-spacing` の負値を設定しない（全角文字が詰まりすぎる）
+- `font-style: italic` を日本語テキストに使わない（日本語フォントに italic バリアントがないため OS が擬似斜体を生成し汚い。強調には `font-weight` を使う）
+
+### 8.4 レスポンシブ時の文字サイズ制約
+
+`clamp()` を使う場合の境界値チェック:
+
+| コンセプト | H1 最小値（モバイル） | H1 最大値（デスクトップ） | 目安（相対感） |
+|---|---|---|---|
+| A: CONNECTED | `2.5rem` (40px) | `4rem` (64px) | Body (16px) の 2.5〜4倍 |
+| B: BOLD | `3rem` (48px) | `5rem` (80px) | Body の 3〜5倍（インパクト重視）|
+| C: HUMAN | `2.25rem` (36px) | `3.5rem` (56px) | Body の 2.25〜3.5倍（親しみやすさ）|
+
+**モバイル（< 768px）での追加制約**:
+- H1 が 2 行以内に収まるか確認する（3 行以上になる場合は `clamp()` の最小値を下げる）
+- Section H2 は `clamp(1.375rem, 4vw, ...)` で 22px 以上を確保する（それ以下は Body と区別がつかなくなる）
+
+### 8.5 CSS カスタムプロパティ（`@theme` 実装例）
+
+```css
+/* app/globals.css — タイポグラフィトークン */
+@theme {
+  /* line-height */
+  --leading-hero:    1.1;
+  --leading-heading: 1.2;
+  --leading-body:    1.75;
+
+  /* letter-spacing（日本語テキスト対応: 正値または0のみ） */
+  --tracking-hero:    0.02em;
+  --tracking-heading: 0.02em;
+  --tracking-body:    0.05em;  /* W3C JLREQ 推奨 */
+
+  /* max-width（テキスト行長制限） */
+  --measure-hero:  14em;   /* Hero H1: 10〜14文字で折り返す */
+  --measure-prose: 42ch;   /* Body: Inter使用時 ≒ 日本語30〜35文字 */
+  --measure-h2:    20em;   /* Section H2 */
+}
+```
+
+> AI への指示: タイポグラフィ値を変更するときは、このトークンを変更する。コンポーネント内に `line-height: 1.1` などをハードコードしない。
+
+### 8.6 実装チェックリスト（コンポーネント作成時）
+
+AIが新しいコンポーネントを作るたびに以下を確認すること:
+
+- [ ] H1/H2 に `text-wrap: balance` が付いているか
+- [ ] H1 の `max-width` が `14em` 以下になっているか
+- [ ] Body テキストの `max-width` が `42ch` 以下になっているか
+- [ ] `line-height` が §8.1 の値になっているか（Body は 1.75 以上）
+- [ ] 日本語テキストに `letter-spacing` の負値が使われていないか
+- [ ] `font-style: italic` が日本語テキストに使われていないか
+- [ ] フォントウェイトが §8.2 の役割に対応しているか（100〜300 は日本語に使わない）
+- [ ] `font-size` が `px` ではなく `rem` で指定されているか
+- [ ] モバイル（< 768px）で H1 が 2 行以内に収まるか
+- [ ] Caption / 小テキストが `0.75rem`（12px）以上になっているか
+
+### 8.7 フォントファミリー・フォールバックスタック
+
+next/font は `latin` サブセットのみをロードするため、日本語文字は OS のシステムフォントで描画される。フォールバックチェーンを明示しないと OS ごとに見た目が大きく変わる。
+
+```css
+/* app/globals.css — フォントファミリー定義 */
+:root {
+  --font-fallback-ja:
+    "Hiragino Kaku Gothic Pro",  /* macOS 10.6+, iOS */
+    "Hiragino Sans",             /* macOS 10.11+ */
+    "Meiryo",                    /* Windows Vista+ */
+    "MS PGothic",                /* Windows XP */
+    "Noto Sans CJK JP",          /* Android / Linux */
+    sans-serif;
+}
+
+body {
+  font-family: var(--font-sans), var(--font-fallback-ja);
+}
+```
+
+> AI への指示: フォントを指定する際は `var(--font-sans)` 単体で終わらせない。必ず `var(--font-fallback-ja)` を後続させる。
+
+**OS 別の描画結果（参考）**:
+
+| OS | 日本語フォント | 特徴 |
+|---|---|---|
+| macOS / iOS | Hiragino Kaku Gothic Pro | きれいで読みやすい。ウェイト 400/700 が自然 |
+| Windows 11 | Meiryo | やや横長。ウェイト 400/700 |
+| Android | Noto Sans CJK JP | Google 標準。バランスが良い |
+
+**フォント関連の禁止パターン（まとめ）**:
+
+| 禁止 | 理由 | 代替 |
+|---|---|---|
+| `font-style: italic` を日本語テキストに使う | italic バリアントなし → 擬似斜体（oblique）が生成されて汚い | 強調は `font-weight` の変化で行う |
+| `font-weight: 100〜300` を日本語テキストに使う | 日本語フォントは 400 / 700 の 2 ウェイトのみ。細ウェイトは 400 で代替表示される | 最低 `font-weight: 400` を使う |
+| `font-size` を `px` 固定で指定する（`html` タグ含む） | ブラウザのフォントサイズ設定（アクセシビリティ機能）を無視する | `rem` で指定する |
+| テキストを `0.75rem`（12px）以下にする | 日本語の最小可読サイズは 12px。それ以下は視認不可 | Caption は `0.875rem`（14px）を最小とする |
+| カスタム日本語フォントファイルをフルセットで配信する | 日本語フォントは 2MB+ になる。ページ表示が大幅に遅くなる | システムフォントフォールバックを使う |
+
+---
+
+## 9. 汎用デザインベストプラクティス（AI 実装制約）
+
+> §8 が「このプロジェクト固有の仕様」であるのに対し、このセクションは「一般的な Web デザインの原則」を AI への指示として明文化したもの。Figma などのデザインツールを使わない場合でも、このセクションを守ることで視覚的な品質を担保する。
+
+### 9.1 視覚的ヒエラルキー
+
+- テキストは最大 3 レベルのヒエラルキーに留める（H1 → H2 → Body。それ以上は複雑になる）
+- セクション内で「最も大きな要素」と「最も小さな要素」のサイズ比は 2:1 以上確保する
+- 同一セクション内の Body テキストは全て同じ `font-size` にする（微妙に違うと不統一に見える）
+- 強調は色・ウェイト・サイズのうち **1つだけ** 変える（複数同時変更は強調効果が弱まる）
+
+### 9.2 スペーシングの原則
+
+- **セクション間の余白 > カード間の余白 > テキスト間の余白** の大小関係を必ず守る
+- 関連する要素は近づける。無関係な要素は離す（Gestalt の近接の法則）
+- ページ内で使うスペーシング値は Tailwind のスケール（4の倍数: 4/8/12/16/24/32/48/64px）に限定する。`17px` などの端数値は使わない
+- Hero セクションの上下パディングは他セクションの 1.5 倍以上にする
+
+### 9.3 コントラストとカラー
+
+- テキストと背景のコントラスト比は WCAG AA 基準（通常テキスト 4.5:1、大テキスト 3:1）を必ず満たす
+- プライマリカラーはページ内で **1色のみ**。アクセントカラーは CTA ボタン・強調箇所に限定して使う
+- グレーを複数使う場合は Tailwind のトーンスケール（200/300/400/500/600/700）から選ぶ。`#f2f2f2` などの端数 hex は使わない
+- セクション背景に強い色を使う場合、前後のセクションとのコントラスト差を意識する（全セクション同背景色は単調になる）
+
+### 9.4 ボタンデザイン
+
+- Primary ボタンは 1 ページに最大 2 箇所。それ以上は Secondary か Ghost に格下げする
+- ボタンの最小タップ領域は 44×44px（iOS HIG 推奨）
+- ボタンラベルは動詞から始める（「無料で相談する」「登録する」。「詳細」「もっと見る」は避ける）
+- hover 時は `opacity` 変化より `background-color` のトーン変化を使う（視認性が高い）
+- disabled 状態は `opacity-50 cursor-not-allowed pointer-events-none` を組み合わせる
+
+### 9.5 画像・メディア
+
+- `<img>` には必ず `alt` を付ける。装飾画像は `alt=""`
+- Hero 背景画像は `object-cover object-center` で表示崩れを防ぐ
+- 画像の上にテキストを重ねる場合、コントラスト確保のため overlay（`bg-black/40` 程度）を必ず入れる
+- `loading="lazy"` は `above the fold` の画像には使わない（LCP が悪化する）
+
+### 9.6 レスポンシブレイアウト
+
+- モバイルファースト: `sm:` `md:` `lg:` のブレークポイント修飾子を使う（デスクトップから縮めない）
+- 1 カラム（モバイル） → 2〜3 カラム（デスクトップ）が基本パターン
+- グリッドのカラム数をモバイルで 3 以上にしない（コンテンツが小さすぎる）
+- フォントサイズはモバイルでも最低 `0.875rem` (14px) を確保する（それ以下は可読性が低い）
+- コンテナの横パディングはモバイルで `px-4`（16px）以上確保する
+
+### 9.7 フォームデザイン
+
+- ラベルはフィールドの上部に配置する（プレースホルダーだけのフォームはアクセシビリティ上 NG）
+- フィールドの幅は入力される内容の長さに合わせる（電話番号フィールドをフル幅にしない）
+- エラーメッセージはフィールドの真下に赤で表示する（フォームの上部にまとめない）
+- Submit ボタンは右寄せより中央寄せまたは左寄せの方がモバイルで押しやすい
+
+### 9.8 インタラクション
+
+- hover トランジションは `duration-150`〜`duration-200` が最も自然に見える（それ以上は重い）
+- `transform` を使うアニメーションは `will-change: transform` を事前に付与する（ただし常用しない）
+- ページ読み込み時のフェードインは `opacity: 0 → 1` を `duration-400` で行う。`duration-1000` 以上はユーザーを待たせる
+- スクロールトリガーのアニメーションは `amount: 0.2`（要素の 20% が見えたら起動）が自然。`amount: 0.8` 以上は発動しないことがある

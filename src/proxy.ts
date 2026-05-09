@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { AbVariant as Variant } from '@/lib/db/schema'
 
-type Variant = 'A' | 'B' | 'C'
 const VARIANTS: Variant[] = ['A', 'B', 'C']
 
 export function proxy(request: NextRequest) {

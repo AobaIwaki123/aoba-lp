@@ -114,7 +114,7 @@ hp-project/
 ├── drizzle/
 │   └── migrations/                 # Drizzle マイグレーションファイル (自動生成)
 │
-├── middleware.ts                    # A/B テスト バリアント Cookie 割り当て
+├── src/proxy.ts                     # バリアント Cookie 割り当て（Next.js 新ファイル規約。旧 middleware.ts）
 ├── .env.example                    # 環境変数テンプレート
 ├── .env.local                      # ローカル環境変数 (gitignore)
 ├── drizzle.config.ts               # Drizzle Kit 設定
@@ -203,7 +203,7 @@ hp-project/
 
 ```
 1. [x] globals.css にバリアント別 CSS カスタムプロパティ定義 (design.md §3〜§5 参照)
-2. [x] middleware.ts — バリアント Cookie 割り当て実装
+2. [x] src/proxy.ts — バリアント Cookie 割り当て実装（Next.js 新ファイル規約）
 3. [x] lib/variants/types.ts, config.ts
 4. [x] LP (/) — 共通セクション (Stats / Services / HowItWorks / Testimonials / CTA)
        コンセプト A のデザイントークンで実装し、後から B/C を追加
@@ -246,15 +246,22 @@ hp-project/
 ### Phase 6: 品質・本番対応
 
 ```
-1. [x] メタデータ・OGP 設定 (求人サービス用タイトル・description)
-2. [x] Lighthouse スコア確認・改善
-3. [x] レート制限実装 (Upstash Redis + x-real-ip)
-4. [x] Slack アラート動作確認 (SLACK_WEBHOOK_URL を Vercel に設定)
-5. [x] インシデント対応手順書 (security.md §4) をチームで確認
-6. [x] E2E テスト (Playwright)
-7. [x] Vercel 本番デプロイ
-8. [x] カスタムドメイン設定
-9. [x] securityheaders.com でヘッダー評価確認 (A 評価以上を確認)
+1. [ ] メタデータ・OGP 設定 (→ 実装詳細は §10 参照)
+   a. [ ] public/fonts/NotoSansJP-Bold.ttf を配置（OG 画像用日本語フォント）
+   b. [ ] app/og/[variant]/page.tsx — Three.js OG プレビューページ作成 (3 ページ)
+   c. [ ] scripts/generate-og-images.ts — Playwright スクリーンショットスクリプト作成
+   d. [ ] pnpm og:generate を実行 → public/og/{a,b,c}-bg.png を生成・コミット
+   e. [ ] app/api/og/route.tsx — ImageResponse ルート作成 (テキストオーバーレイ)
+   f. [ ] 各ページに metadata export 追加 (app/layout.tsx + 各 page.tsx)
+   g. [ ] NEXT_PUBLIC_SITE_URL を .env.local / Vercel に設定
+2. [ ] Lighthouse スコア確認・改善
+3. [ ] レート制限実装 (Upstash Redis + x-real-ip)
+4. [ ] Slack アラート動作確認 (SLACK_WEBHOOK_URL を Vercel に設定)
+5. [ ] インシデント対応手順書 (security.md §4) をチームで確認
+6. [ ] E2E テスト (Playwright)
+7. [ ] Vercel 本番デプロイ
+8. [ ] カスタムドメイン設定
+9. [ ] securityheaders.com でヘッダー評価確認 (A 評価以上を確認)
 ```
 
 ---
@@ -706,7 +713,315 @@ CTA:      ホームに戻る   →  href="/"
 
 ---
 
-## 10. CI ワークフロー
+## 10. OG 画像・メタデータ実装仕様
+
+### 10.1 アーキテクチャ概要
+
+OG 画像は **2 レイヤー構成** で生成する。
+
+```
+Layer 1: Three.js 背景 PNG（静的、ビルド前に生成・コミット）
+   ├── public/og/variant-a-bg.png  (1200×630px)
+   ├── public/og/variant-b-bg.png
+   └── public/og/variant-c-bg.png
+         ↓ 生成方法: scripts/generate-og-images.ts (Playwright)
+
+Layer 2: ImageResponse テキストオーバーレイ（動的、Edge/Node.js runtime）
+   └── app/api/og/route.tsx
+         ?variant=A|B|C  (省略時: A)
+         ?page=home|about|contact|privacy  (省略時: home)
+         → Layer 1 の PNG を背景に読み込み + テキストを描画 → 1200×630px PNG を返す
+```
+
+**なぜ Playwright か**: `@react-three/fiber` は WebGL を使うため Edge Runtime では動かない。
+Playwright はすでにプロジェクトに組み込まれており、実際の Three.js シーンをそのままキャプチャできる。
+OG 画像が LP の 3D 演出と視覚的に一致するため、ブランド一貫性が高い。
+
+### 10.2 OG プレビューページ仕様
+
+`app/og/[variant]/page.tsx` — **公開はしないが URL でアクセス可能**な専用ページ。
+
+```
+URL:     /og/a  /og/b  /og/c
+サイズ:  1200×630px（OG 標準サイズ）
+内容:    Three.js Canvas を全面表示 + テキストオーバーレイ（CSS）
+インデックス: robots.txt / メタタグで noindex
+```
+
+**レイアウト共通仕様**:
+
+| 要素 | 仕様 |
+|---|---|
+| ページサイズ | `width: 1200px`, `height: 630px`, `overflow: hidden` |
+| Three.js Canvas | 全面背景（`position: absolute`, `inset: 0`） |
+| テキスト位置 | 左寄せ、水平 60px、垂直中央 |
+| ロゴ | 左上に「Jobify」テキストロゴ（実装フォント使用）|
+| 見出し | バリアント別ヒーローキャッチコピー（§2 参照） |
+| サブテキスト | 固定文言「AI × 人材マッチングサービス」 |
+
+**バリアント別デザイン**:
+
+| バリアント | 背景 | Canvas | テキスト色 |
+|---|---|---|---|
+| A: CONNECTED | Slate 900 (`#0f172a`) | ParticleNetwork（インディゴ・パーティクル） | White |
+| B: BOLD | Zinc 950 (`#09090b`) | WireframeIcosahedron（パープル・グロー） | White |
+| C: HUMAN | Warm White (`#fffbf5`) | FloatingSpheres（アンバー・球体） | Stone 900 |
+
+```tsx
+// app/og/[variant]/page.tsx
+import { notFound } from 'next/navigation'
+import type { Variant } from '@/lib/variants/types'
+import { ParticleNetwork } from '@/components/canvas/ParticleNetwork'
+import { WireframeIcosahedron } from '@/components/canvas/WireframeIcosahedron'
+import { FloatingSpheres } from '@/components/canvas/FloatingSpheres'
+
+const OG_CONFIGS = {
+  a: { Canvas: ParticleNetwork, bg: '#0f172a', textColor: '#ffffff', headline: '人と企業の、最適な出会いを。' },
+  b: { Canvas: WireframeIcosahedron, bg: '#09090b', textColor: '#ffffff', headline: '次のキャリアは、ここから始まる。' },
+  c: { Canvas: FloatingSpheres, bg: '#fffbf5', textColor: '#1c1917', headline: 'あなたの可能性を、一緒に広げよう。' },
+} as const
+
+export const metadata = { robots: 'noindex' }
+
+export default function OGPreviewPage({ params }: { params: { variant: string } }) {
+  const cfg = OG_CONFIGS[params.variant as keyof typeof OG_CONFIGS]
+  if (!cfg) notFound()
+
+  return (
+    <div style={{ width: 1200, height: 630, position: 'relative', overflow: 'hidden', background: cfg.bg }}>
+      <cfg.Canvas />
+      {/* テキストオーバーレイ */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                    justifyContent: 'center', padding: '0 80px', color: cfg.textColor }}>
+        <p style={{ fontSize: 18, marginBottom: 24, opacity: 0.7 }}>AI × 人材マッチングサービス</p>
+        <h1 style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.15, maxWidth: 700 }}>
+          {cfg.headline}
+        </h1>
+        <p style={{ fontSize: 22, marginTop: 32, opacity: 0.8 }}>Jobify</p>
+      </div>
+    </div>
+  )
+}
+```
+
+### 10.3 Playwright 生成スクリプト
+
+```typescript
+// scripts/generate-og-images.ts
+import { chromium } from '@playwright/test'
+import path from 'path'
+import fs from 'fs'
+
+const BASE_URL = process.env.OG_BASE_URL ?? 'http://localhost:3000'
+const OUT_DIR = path.join(process.cwd(), 'public/og')
+
+const VARIANTS = [
+  { slug: 'a', filename: 'variant-a-bg.png' },
+  { slug: 'b', filename: 'variant-b-bg.png' },
+  { slug: 'c', filename: 'variant-c-bg.png' },
+]
+
+async function main() {
+  fs.mkdirSync(OUT_DIR, { recursive: true })
+
+  const browser = await chromium.launch()
+  const page = await browser.newPage()
+  await page.setViewportSize({ width: 1200, height: 630 })
+
+  for (const { slug, filename } of VARIANTS) {
+    await page.goto(`${BASE_URL}/og/${slug}`, { waitUntil: 'networkidle' })
+    // Three.js が描画完了するまで待機
+    await page.waitForTimeout(1500)
+    await page.screenshot({ path: path.join(OUT_DIR, filename), type: 'png' })
+    console.log(`Generated: ${filename}`)
+  }
+
+  await browser.close()
+}
+
+main().catch(console.error)
+```
+
+**package.json に追加**:
+
+```json
+"og:generate": "next build && next start & sleep 3 && tsx scripts/generate-og-images.ts && kill %1"
+```
+
+> 生成された `public/og/*.png` はデザイン資産としてリポジトリにコミットする。
+> Three.js 演出を変更した場合は `pnpm og:generate` を再実行してコミットし直す。
+
+### 10.4 ImageResponse ルート（テキストオーバーレイ）
+
+```typescript
+// app/api/og/route.tsx
+import { ImageResponse } from 'next/og'
+import { NextRequest } from 'next/server'
+import fs from 'fs'
+import path from 'path'
+
+export const runtime = 'nodejs'  // fs.readFileSync のため Node.js runtime 必須
+
+const VARIANT_BG: Record<string, string> = {
+  A: '/og/variant-a-bg.png',
+  B: '/og/variant-b-bg.png',
+  C: '/og/variant-c-bg.png',
+}
+
+const PAGE_META: Record<string, { title: string; description: string }> = {
+  home:    { title: '人と企業の、最適な出会いを。', description: 'AI × 人材マッチングサービス Jobify' },
+  about:   { title: 'Jobify について',              description: 'はたらく人の可能性を広げる' },
+  contact: { title: 'お問い合わせ',                description: 'キャリアの悩み、お気軽にご相談ください' },
+}
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = req.nextUrl
+  const variant = (searchParams.get('variant') ?? 'A').toUpperCase()
+  const page = searchParams.get('page') ?? 'home'
+
+  const meta = PAGE_META[page] ?? PAGE_META.home
+  const bgPath = path.join(process.cwd(), 'public', VARIANT_BG[variant] ?? VARIANT_BG.A)
+  const bgData = `data:image/png;base64,${fs.readFileSync(bgPath).toString('base64')}`
+
+  // 日本語フォント読み込み
+  const fontPath = path.join(process.cwd(), 'public/fonts/NotoSansJP-Bold.ttf')
+  const fontData = fs.readFileSync(fontPath)
+
+  const textColor = variant === 'C' ? '#1c1917' : '#ffffff'
+  const accentColor = variant === 'A' ? '#818cf8' : variant === 'B' ? '#d8b4fe' : '#fbbf24'
+
+  return new ImageResponse(
+    (
+      <div style={{ width: 1200, height: 630, position: 'relative', display: 'flex' }}>
+        {/* 背景 PNG */}
+        <img src={bgData} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+        {/* テキスト */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                      justifyContent: 'center', padding: '0 80px', color: textColor }}>
+          <p style={{ fontSize: 16, color: accentColor, marginBottom: 20, letterSpacing: '0.1em' }}>
+            AI × 人材マッチング
+          </p>
+          <h1 style={{ fontSize: 52, fontWeight: 800, lineHeight: 1.15, maxWidth: 680, margin: 0 }}>
+            {meta.title}
+          </h1>
+          <p style={{ fontSize: 20, marginTop: 28, opacity: 0.75 }}>
+            {meta.description}
+          </p>
+          <p style={{ position: 'absolute', bottom: 48, right: 80, fontSize: 24,
+                      fontWeight: 700, opacity: 0.9 }}>
+            Jobify
+          </p>
+        </div>
+      </div>
+    ),
+    {
+      width: 1200,
+      height: 630,
+      fonts: [{ name: 'NotoSansJP', data: fontData, weight: 700 }],
+    }
+  )
+}
+```
+
+### 10.5 デザインパターン一覧
+
+| パターン ID | バリアント | ページ | URL 例 | 説明 |
+|---|---|---|---|---|
+| `og-a-home` | A | LP | `/api/og?variant=A&page=home` | Particle Network + キャッチコピー |
+| `og-a-about` | A | About | `/api/og?variant=A&page=about` | Particle Network + 会社紹介 |
+| `og-a-contact` | A | Contact | `/api/og?variant=A&page=contact` | Particle Network + お問い合わせ |
+| `og-b-home` | B | LP | `/api/og?variant=B&page=home` | Wireframe Icosahedron + キャッチコピー |
+| `og-b-about` | B | About | `/api/og?variant=B&page=about` | Wireframe Icosahedron + 会社紹介 |
+| `og-c-home` | C | LP | `/api/og?variant=C&page=home` | Floating Spheres + キャッチコピー |
+| `og-c-contact` | C | Contact | `/api/og?variant=C&page=contact` | Floating Spheres + お問い合わせ |
+
+> 全 3 バリアント × 3 ページ = 9 パターン。バリアント B は現在 Phase 2（未稼働）のため `og-b-*` は作成不要。Phase 2 開始時に追加する。
+
+### 10.6 メタデータ仕様（ページ別）
+
+```typescript
+// app/layout.tsx — metadataBase + デフォルト定義
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  title: {
+    default: 'Jobify — AI × 人材マッチング',
+    template: '%s | Jobify',
+  },
+  description: '5,000社以上の求人から、あなたのキャリアにぴったりの一社を見つけましょう。',
+  openGraph: {
+    type: 'website',
+    locale: 'ja_JP',
+    siteName: 'Jobify',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
+```
+
+**ページ別 metadata**:
+
+| ページ | title | description | OG image URL |
+|---|---|---|---|
+| LP `/` | バリアント別（§2 参照） | バリアント別サブコピー先頭50字 | `/api/og?variant={variant}&page=home` |
+| `/about` | `会社について` | `はたらく人の可能性を広げる。テクノロジーと人の力で最適な出会いを創出します。` | `/api/og?variant={variant}&page=about` |
+| `/contact` | `お問い合わせ` | `キャリアの悩みをお気軽にご相談ください。無料相談はこちらから。` | `/api/og?variant={variant}&page=contact` |
+| `/privacy-policy` | `プライバシーポリシー` | `個人情報の取り扱いについて` | なし（デフォルト OG） |
+| `/contact/success` | `送信完了` | なし | なし |
+
+```typescript
+// app/(marketing)/page.tsx — バリアント対応 LP の metadata
+import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import type { Variant } from '@/lib/variants/types'
+import { variantConfig } from '@/lib/variants/config'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const variant = ((await cookies()).get('variant')?.value ?? 'A') as Variant
+  const config = variantConfig[variant]
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+
+  return {
+    title: config.heroHeadline,
+    description: config.heroSubcopy,
+    openGraph: {
+      title: config.heroHeadline,
+      description: config.heroSubcopy,
+      images: [{
+        url: `${siteUrl}/api/og?variant=${variant}&page=home`,
+        width: 1200,
+        height: 630,
+        alt: config.heroHeadline,
+      }],
+    },
+    twitter: {
+      title: config.heroHeadline,
+      description: config.heroSubcopy,
+      images: [`${siteUrl}/api/og?variant=${variant}&page=home`],
+    },
+  }
+}
+```
+
+### 10.7 実装上の注意点
+
+| 項目 | 内容 |
+|---|---|
+| runtime 指定 | `app/api/og/route.tsx` に `export const runtime = 'nodejs'` を必ず付ける（`fs` を使うため Edge 不可） |
+| 日本語フォント | `NotoSansJP-Bold.ttf`（約 3MB）を `public/fonts/` に配置。`pnpm i` 後に手動コピーが必要 |
+| 画像キャッシュ | OG route のレスポンスに `Cache-Control: public, max-age=86400` を追加する |
+| Three.js 待機 | `generate-og-images.ts` の `waitForTimeout(1500)` は Three.js の初期描画完了を待つための値。FPS が遅い環境では延ばす |
+| static ファイルのコミット | `public/og/*.png` は `.gitignore` に含めない。デザイン変更時は再生成してコミット |
+| OG プレビューページの非公開 | `/og/[variant]` は sitemap.xml から除外し、`<meta name="robots" content="noindex">` を付ける |
+| `NEXT_PUBLIC_SITE_URL` | Vercel の環境変数に本番 URL (`https://aooba.net`) をセットする |
+
+---
+
+## 11. CI ワークフロー
 
 ```yaml
 # .github/workflows/ci.yml
@@ -766,3 +1081,17 @@ jobs:
 >   "db:migrate": "drizzle-kit migrate"
 > }
 > ```
+
+---
+
+## 11. MORE (将来のタスク・残件)
+
+### OG 画像・メタデータ実装
+
+背景 PNG 生成の仕組みは設計済みだが、以下の実装が残っている。
+
+1. [ ] **OG プレビューページの作成**: `app/og/[variant]/page.tsx` の実装。
+2. [ ] **生成スクリプトの実装**: `scripts/generate-og-images.ts` の作成と `pnpm og:generate` コマンドの設定。
+3. [ ] **ImageResponse ルートの作成**: `app/api/og/route.tsx` でのテキスト合成処理の実装。
+4. [ ] **メタデータ統合**: `generateMetadata` を各ページに適用し、バリアント別の OG 画像 URL を設定する。
+

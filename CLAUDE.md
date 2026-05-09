@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 求人サービスのコーポレートHP。フォーム投稿受付・A/Bテスト（3デザインコンセプト）・3D演出を含む。
 `src/` はディレクトリ骨格のみ（`.gitkeep`）で、実装はこれから始まる段階。
 
-**スタック**: Next.js 15 (App Router) · TypeScript strict · Tailwind CSS v4 · shadcn/ui · @react-three/fiber · Drizzle ORM · Neon Postgres · Upstash Redis · Resend · Framer Motion · Vercel
+**スタック**: Next.js 16 (App Router) · TypeScript strict · Tailwind CSS v4 · shadcn/ui · @react-three/fiber · Drizzle ORM · Neon Postgres · Upstash Redis · Resend · Framer Motion · Vercel
 
 ---
 
@@ -54,7 +54,7 @@ src/
 ```
 
 **重要ファイル**:
-- `middleware.ts`（ルート直下）— 初回アクセス時に `variant=A|B|C` Cookie を付与する。これがないと A/Bテスト全体が機能しない
+- `src/proxy.ts` — Next.js の新ファイル規約（旧 `middleware.ts`）。`proxy` という名前で export する。Edge Runtime 制約のため DB インポート不可・独自 `Variant` 型を定義。**このファイルがないと A/B テストが機能しない**
 - `drizzle.config.ts` — マイグレーション時に `DATABASE_URL_UNPOOLED`（直接接続）を参照する設定
 - `next.config.ts` — CSP・セキュリティヘッダーが定義される（`security.md §2.1` と対応）
 
@@ -108,7 +108,7 @@ pnpm test:e2e                # Playwright
 - **レート制限は `x-forwarded-for` を使わない** — Vercel では偽装可能。`x-real-ip` を使う（`security.md §2.2`）
 - **`pnpm db:migrate` 後に `updated_at` トリガーを手動で Neon SQL Editor から実行する** — Drizzle Kit はトリガーを自動生成しない（`database.md §5b`）
 - **FormData のチェックボックスは `'on'` で来る** — Server Action で `agreed: rawData.agreed === 'on'` に変換してから Zod に渡す（`implementation-guide.md §4`）
-- **`Variant` 型を二重定義しない** — `lib/variants/types.ts` でのみ定義し、`database.md` の `abVariantEnum` から派生させる
+- **`Variant` 型の二重定義は意図的** — `src/proxy.ts` は Edge Runtime で動くため DB インポートが不可。`proxy.ts` のみローカル型定義を持つ。`lib/variants/types.ts` は RSC / Server Action 側で使う
 
 ---
 

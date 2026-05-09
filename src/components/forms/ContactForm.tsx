@@ -138,7 +138,7 @@ export function ContactForm() {
 
       <Button
         type="submit"
-        disabled={!agreed || isPending}
+        disabled={isPending}
         className="w-full py-6 text-base font-semibold"
         style={{ background: 'var(--color-brand)' }}
       >
