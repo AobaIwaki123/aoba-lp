@@ -39,7 +39,7 @@ export function HeroA({ config }: Props) {
           aria-hidden="true"
         />
       )}
-      <div className="relative z-10 max-w-3xl mx-auto px-4 text-center">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
         <p
           className="text-xs tracking-widest uppercase mb-6"
           style={{ color: isDesktop ? 'var(--color-text-muted)' : 'rgba(255,255,255,0.8)' }}

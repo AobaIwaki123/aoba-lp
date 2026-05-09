@@ -74,6 +74,7 @@
 ─────────────────────────── */
 :root[data-variant="A"] {
   --font-sans-resolved:    var(--font-inter);
+  --measure-hero:          16em;
 
   --color-bg:              #ffffff;
   --color-bg-subtle:       #f8fafc;
@@ -157,5 +158,19 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans-resolved, var(--font-geist-sans));
+  }
+}
+
+/* ───────────────────────────
+   Typography utilities
+─────────────────────────── */
+@layer components {
+  .heading-ja {
+    text-wrap: balance;
+    overflow-wrap: break-word;
+  }
+
+  .body-ja {
+    text-wrap: pretty;
   }
 }

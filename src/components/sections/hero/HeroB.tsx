@@ -54,7 +54,7 @@ export function HeroB({ config }: Props) {
           <h1
             className="heading-ja font-black mb-6"
             style={{
-              fontSize: 'clamp(3rem, 6vw, 5rem)',
+              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
               color: isDesktop ? 'var(--color-text)' : '#ffffff',
               lineHeight: 'var(--leading-hero)',
               letterSpacing: 'var(--tracking-hero)',
