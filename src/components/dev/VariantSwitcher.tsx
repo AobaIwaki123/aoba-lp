@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 const VARIANTS = ['A', 'B', 'C'] as const
 const COLORS = { A: '#4f46e5', B: '#a855f7', C: '#d97706' } as const
 
@@ -8,15 +10,16 @@ function switchVariant(v: string) {
   location.reload()
 }
 
-function currentVariant(): string {
-  if (typeof document === 'undefined') return ''
+function readVariantCookie(): string {
   return document.cookie.split(';').find(c => c.trim().startsWith('variant='))?.split('=')[1] ?? 'A'
 }
 
 export function VariantSwitcher() {
   if (process.env.NODE_ENV !== 'development') return null
 
-  const current = currentVariant()
+  // '' on server/hydration → actual value after mount to avoid hydration mismatch
+  const [current, setCurrent] = useState('')
+  useEffect(() => { setCurrent(readVariantCookie()) }, [])
 
   return (
     <div
