@@ -18,7 +18,7 @@ export default async function MarketingLayout({
       <Header primaryCta={primaryCta} />
       <main className="flex-1">{children}</main>
       <Footer />
-      <VariantSwitcher />
+      <VariantSwitcher currentVariant={variant} />
     </>
   )
 }

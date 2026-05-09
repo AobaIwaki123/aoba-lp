@@ -8,12 +8,15 @@ export function proxy(request: NextRequest) {
 
   const forced = request.nextUrl.searchParams.get('__variant') as Variant | null
   if (forced && (VARIANTS as string[]).includes(forced)) {
-    res.cookies.set('variant', forced, {
-      maxAge: 60 * 60 * 24 * 30, // Override keeps it for a while too to test
+    const url = request.nextUrl.clone()
+    url.searchParams.delete('__variant')
+    const redirect = NextResponse.redirect(url)
+    redirect.cookies.set('variant', forced, {
+      maxAge: 60 * 60 * 24 * 30,
       httpOnly: true,
       path: '/',
     })
-    return res
+    return redirect
   }
 
   if (!request.cookies.get('variant')) {
