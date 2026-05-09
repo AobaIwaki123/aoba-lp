@@ -24,7 +24,6 @@
   <a href="https://vercel.com/new/clone?repository-url=https://github.com/AobaIwaki123/aoba-lp&env=DATABASE_URL,DATABASE_URL_UNPOOLED,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,CONTACT_EMAIL,SLACK_WEBHOOK_URL">
     <img src="https://vercel.com/button" alt="Deploy with Vercel" height="36" />
   </a>
-  &nbsp;&nbsp;
 </p>
 
 ---
