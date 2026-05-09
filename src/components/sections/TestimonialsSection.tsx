@@ -66,7 +66,7 @@ export function TestimonialsSection() {
                   >
                     {name}
                   </p>
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
                     {role}
                   </p>
                 </div>
@@ -75,7 +75,7 @@ export function TestimonialsSection() {
           ))}
         </div>
         <p
-          className="text-center text-xs mt-8"
+          className="text-center text-sm mt-8"
           style={{ color: 'var(--color-text-muted)' }}
         >
           ※ 個人の体験談です。

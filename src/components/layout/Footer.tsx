@@ -12,8 +12,8 @@ export function Footer() {
       className="border-t border-[--color-border-brand] bg-[--color-bg-subtle]"
       aria-label="フッター"
     >
-      <div className="max-w-6xl mx-auto px-4 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="font-bold text-[--color-text]">Jobify</p>
+      <div className="max-w-6xl mx-auto px-4 py-10 flex flex-col items-center gap-6">
+        <p className="font-bold text-xl text-[--color-text]">Jobify</p>
 
         <nav aria-label="フッターナビゲーション">
           <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">

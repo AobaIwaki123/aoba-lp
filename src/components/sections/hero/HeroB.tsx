@@ -46,7 +46,7 @@ export function HeroB({ config }: Props) {
       <div className="relative z-10 max-w-6xl mx-auto px-4 w-full flex flex-col md:flex-row items-center">
         <div className="md:w-1/2 text-center md:text-left">
           <p
-            className="text-xs tracking-widest uppercase mb-6 font-bold"
+            className="text-sm tracking-widest uppercase mb-6 font-bold"
             style={{ color: isDesktop ? 'var(--color-accent)' : 'rgba(255,255,255,0.8)' }}
           >
             ハイクラス特化型

@@ -27,7 +27,7 @@ export function Header({ primaryCta }: { primaryCta: string }) {
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link
           href="/"
-          className="font-bold text-lg text-[--color-text] hover:text-[--color-brand] transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[--color-brand] rounded-sm outline-none"
+          className="font-bold text-2xl text-[--color-text] hover:text-[--color-brand] transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[--color-brand] rounded-sm outline-none"
           aria-label="ホームへ戻る"
         >
           Jobify

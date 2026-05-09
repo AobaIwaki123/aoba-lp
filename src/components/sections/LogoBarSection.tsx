@@ -17,7 +17,7 @@ export function LogoBarSection() {
       }}
     >
       <p
-        className="text-center text-xs tracking-widest uppercase mb-6"
+        className="text-center text-sm tracking-widest uppercase mb-6"
         style={{ color: 'var(--color-text-muted)' }}
       >
         導入企業

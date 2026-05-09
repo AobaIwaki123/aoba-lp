@@ -41,7 +41,7 @@ export function HeroA({ config }: Props) {
       )}
       <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
         <p
-          className="text-xs tracking-widest uppercase mb-6"
+          className="text-sm tracking-widest uppercase mb-6"
           style={{ color: isDesktop ? 'var(--color-text-muted)' : 'rgba(255,255,255,0.8)' }}
         >
           AI × 人材マッチング
