@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>OG Image Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0d0d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px;
+      gap: 20px;
+      font-family: system-ui, sans-serif;
+      color: #e2e8f0;
+    }
+    .page-title { font-size: 12px; opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; }
+
+    #three-canvas { display: none; }
+
+    #output {
+      border-radius: 10px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+      max-width: 90vw;
+      height: auto;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 11px;
+      color: #64748b;
+    }
+    input[type="text"] {
+      background: #1a1a2e;
+      border: 1px solid #2d2d45;
+      color: #e2e8f0;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      width: 280px;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--theme-color, #fbbf24); }
+    input[type="range"] {
+      accent-color: var(--theme-color, #fbbf24);
+      width: 130px;
+    }
+
+    button {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    button:hover { opacity: 0.8; }
+
+    #btn-save {
+      background: var(--theme-color, #fbbf24);
+      color: #0d0d0d;
+    }
+    #btn-freeze, #btn-randomize {
+      background: #1e2030;
+      color: #94a3b8;
+      border: 1px solid #2d2d45;
+    }
+
+    .variant-tabs {
+      display: flex;
+      gap: 6px;
+      background: #161622;
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid #2d2d45;
+    }
+    .btn-variant {
+      padding: 8px 22px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-variant:hover { color: #94a3b8; opacity: 1; }
+    .btn-variant.active {
+      background: var(--theme-color, #fbbf24);
+      color: #0d0d0d;
+      opacity: 1 !important;
+    }
+
+    .hint { font-size: 11px; color: #374151; }
+    .divider { width: 2px; height: 24px; background: #1e2030; border-radius: 1px; }
+  </style>
+</head>
+<body>
+  <div class="page-title">OG Image Generator — 1200 × 630</div>
+
+  <canvas id="three-canvas" width="1200" height="630"></canvas>
+  <canvas id="output"       width="1200" height="630"></canvas>
+
+  <div class="variant-tabs">
+    <button class="btn-variant active" data-variant="A">Variant A — Particles</button>
+    <button class="btn-variant"        data-variant="B">Variant B — Rings</button>
+    <button class="btn-variant"        data-variant="C">Variant C — Spheres</button>
+  </div>
+
+  <div class="row">
+    <div class="field">眉コピー   <input type="text" id="eyebrow"  value="AI × 人材マッチング"></div>
+    <div class="field">見出し     <input type="text" id="headline" value="人と企業の、最適な出会いを。"></div>
+    <div class="field">サブコピー <input type="text" id="subcopy"  value="5,000社以上の求人から、あなたのキャリアにぴったりの一社を。"></div>
+  </div>
+
+  <div class="row">
+    <div class="field"><span id="count-label">密度</span>  <input type="range" id="obj-count"     min="100" max="800" value="500"></div>
+    <div class="field">透明度    <input type="range" id="obj-opacity"   min="5"   max="90"  value="70"></div>
+    <div class="field">背景明度  <input type="range" id="bg-lightness"  min="0"   max="30"  value="8"></div>
+    <div class="divider"></div>
+    <button id="btn-randomize">Randomize</button>
+    <button id="btn-freeze">⏸ Freeze</button>
+    <button id="btn-save">Save PNG</button>
+  </div>
+
+  <div class="hint">Freeze で止めてから好みのフレームで Save してください</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js"></script>
+
+  <script>
+    const W = 1200, H = 630;
+    const threeCanvas = document.getElementById('three-canvas');
+    const output = document.getElementById('output');
+    const ctx = output.getContext('2d');
+
+    // ── Theme + shape config per variant ─────────────────────────────────────
+    const THEMES = {
+      A: {
+        shape:         'particles',
+        colors:        [0x4f46e5, 0x06b6d4, 0x818cf8, 0x22d3ee, 0x6366f1, 0x0ea5e9, 0x38bdf8],
+        bgTopBase:     [0.16, 0.18, 0.60],
+        bgBottomBase:  [0.08, 0.10, 0.50],
+        keyColor:      0x22d3ee,
+        fillColor:     0x4f46e5,
+        vigRgb:        '4,8,22',
+        accent1:       '#6366f1',
+        accent2:       '#06b6d4',
+        eyebrowColor:  '#22d3ee',
+        glowColor:     'rgba(99,102,241,0.32)',
+        themeColor:    '#22d3ee',
+        countLabel:    '密度',
+        countMin: 100, countMax: 800, countDefault: 500,
+        opacityDefault: 75,
+        copy: {
+          eyebrow:  'AI × 人材マッチング',
+          headline: '人と企業の、最適な出会いを。',
+          subcopy:  '5,000社以上の求人から、あなたのキャリアにぴったりの一社を。',
+        },
+      },
+      B: {
+        shape:         'rings',
+        colors:        [0x7c3aed, 0xec4899, 0xa855f7, 0xf0abfc, 0x9333ea, 0xdb2777, 0xc026d3],
+        bgTopBase:     [0.26, 0.08, 0.48],
+        bgBottomBase:  [0.16, 0.04, 0.38],
+        keyColor:      0xa855f7,
+        fillColor:     0xec4899,
+        vigRgb:        '8,4,16',
+        accent1:       '#7c3aed',
+        accent2:       '#ec4899',
+        eyebrowColor:  '#c084fc',
+        glowColor:     'rgba(168,85,247,0.32)',
+        themeColor:    '#a855f7',
+        countLabel:    'リング数',
+        countMin: 3, countMax: 14, countDefault: 7,
+        opacityDefault: 40,
+        copy: {
+          eyebrow:  'AI × 人材マッチング',
+          headline: '次のキャリアは、ここから始まる。',
+          subcopy:  'AIによるマッチングで、理想の職場との出会いを加速させます。',
+        },
+      },
+      C: {
+        shape:         'spheres',
+        colors:        [0xfbbf24, 0xf59e0b, 0xf43f5e, 0xfb923c, 0xfcd34d, 0xf97316, 0xfde68a],
+        bgTopBase:     [0.30, 0.18, 0.08],
+        bgBottomBase:  [0.20, 0.08, 0.04],
+        keyColor:      0xfbbf24,
+        fillColor:     0xf43f5e,
+        vigRgb:        '4,4,12',
+        accent1:       '#fbbf24',
+        accent2:       '#f43f5e',
+        eyebrowColor:  '#fbbf24',
+        glowColor:     'rgba(251,191,36,0.28)',
+        themeColor:    '#fbbf24',
+        countLabel:    '球体数',
+        countMin: 3, countMax: 16, countDefault: 9,
+        opacityDefault: 28,
+        copy: {
+          eyebrow:  'AI × 人材マッチング',
+          headline: 'あなたの可能性を、一緒に広げよう。',
+          subcopy:  '一人ひとりに寄り添い、あなたらしいキャリアを一緒に考えます。',
+        },
+      },
+    };
+
+    let currentTheme = THEMES.A;
+    let activeVariant = 'A';
+
+    // ── Renderer ──────────────────────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, antialias: true, alpha: false });
+    renderer.setSize(W, H);
+    renderer.setPixelRatio(1);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 100);
+    camera.position.set(0, 0, 15);
+
+    // ── Background ────────────────────────────────────────────────────────────
+    const bgMat = new THREE.ShaderMaterial({
+      uniforms: { uTop: { value: new THREE.Color() }, uBottom: { value: new THREE.Color() } },
+      vertexShader:   `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+      fragmentShader: `uniform vec3 uTop,uBottom; varying vec2 vUv; void main() { gl_FragColor = vec4(mix(uBottom,uTop,vUv.y),1.0); }`,
+      depthWrite: false,
+    });
+    const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(80, 50), bgMat);
+    bgMesh.position.z = -20;
+    scene.add(bgMesh);
+
+    function updateBg() {
+      const l = parseInt(document.getElementById('bg-lightness').value) / 100;
+      const t = currentTheme;
+      bgMat.uniforms.uTop.value.setRGB(   l*t.bgTopBase[0],    l*t.bgTopBase[1],    l*t.bgTopBase[2]);
+      bgMat.uniforms.uBottom.value.setRGB(l*t.bgBottomBase[0], l*t.bgBottomBase[1], l*t.bgBottomBase[2]);
+    }
+    updateBg();
+
+    // ── Lights ────────────────────────────────────────────────────────────────
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const keyLight  = new THREE.PointLight(currentTheme.keyColor,  2.2);
+    keyLight.position.set(8, 8, 12);
+    scene.add(keyLight);
+    const fillLight = new THREE.PointLight(currentTheme.fillColor, 0.9);
+    fillLight.position.set(-10, -5, 6);
+    scene.add(fillLight);
+
+    // ── Scene objects (cleared on variant switch) ─────────────────────────────
+    let sceneObjects = [];   // THREE.Object3D[]
+    let animData     = [];   // per-object animation data
+
+    function clearScene() {
+      sceneObjects.forEach(o => scene.remove(o));
+      sceneObjects = []; animData = [];
+    }
+
+    // ── Variant A: Particle cloud ─────────────────────────────────────────────
+    function buildParticles() {
+      const count   = parseInt(document.getElementById('obj-count').value);
+      const opacity = parseInt(document.getElementById('obj-opacity').value) / 100;
+      const palette = currentTheme.colors.map(c => new THREE.Color(c));
+
+      const pos    = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const sizes  = new Float32Array(count);
+
+      for (let i = 0; i < count; i++) {
+        pos[i*3]   = (Math.random() - 0.5) * 26;
+        pos[i*3+1] = (Math.random() - 0.5) * 16;
+        pos[i*3+2] = (Math.random() - 0.5) * 10 - 3;
+        const c = palette[i % palette.length];
+        colors[i*3] = c.r; colors[i*3+1] = c.g; colors[i*3+2] = c.b;
+        sizes[i] = Math.random() * 2.5 + 0.8;
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+      geo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
+
+      const mat = new THREE.PointsMaterial({
+        size: 0.08, vertexColors: true, transparent: true,
+        opacity, sizeAttenuation: true,
+      });
+      const points = new THREE.Points(geo, mat);
+      scene.add(points);
+      sceneObjects.push(points);
+      animData.push({ type: 'particles', geo, basePos: pos.slice() });
+    }
+
+    // ── Variant B: Torus rings ────────────────────────────────────────────────
+    function buildRings() {
+      const count   = parseInt(document.getElementById('obj-count').value);
+      const opacity = parseInt(document.getElementById('obj-opacity').value) / 100;
+      const colors  = currentTheme.colors;
+
+      for (let i = 0; i < count; i++) {
+        const r    = Math.random() * 2.2 + 1.0;
+        const tube = Math.random() * 0.06 + 0.025;
+        const mesh = new THREE.Mesh(
+          new THREE.TorusGeometry(r, tube, 16, 120),
+          new THREE.MeshBasicMaterial({
+            color: colors[i % colors.length], transparent: true, opacity,
+          })
+        );
+        mesh.position.set(
+          (Math.random() - 0.5) * 20,
+          (Math.random() - 0.5) * 12,
+          (Math.random() - 0.5) * 8 - 3
+        );
+        mesh.rotation.set(
+          Math.random() * Math.PI,
+          Math.random() * Math.PI,
+          Math.random() * Math.PI
+        );
+        scene.add(mesh);
+        sceneObjects.push(mesh);
+        animData.push({
+          type: 'ring',
+          rx: (Math.random() - 0.5) * 0.006,
+          ry: (Math.random() - 0.5) * 0.006,
+          rz: (Math.random() - 0.5) * 0.004,
+        });
+      }
+    }
+
+    // ── Variant C: Spheres ────────────────────────────────────────────────────
+    function buildSpheres() {
+      const count   = parseInt(document.getElementById('obj-count').value);
+      const opacity = parseInt(document.getElementById('obj-opacity').value) / 100;
+      const colors  = currentTheme.colors;
+
+      for (let i = 0; i < count; i++) {
+        const mesh = new THREE.Mesh(
+          new THREE.SphereGeometry(1, 40, 40),
+          new THREE.MeshPhongMaterial({
+            color: colors[i % colors.length], transparent: true, opacity, shininess: 120,
+          })
+        );
+        const px = (Math.random() - 0.5) * 22;
+        const py = (Math.random() - 0.5) * 14;
+        mesh.position.set(px, py, (Math.random() - 0.5) * 8 - 4);
+        mesh.scale.setScalar(Math.random() * 1.8 + 0.4);
+        scene.add(mesh);
+        sceneObjects.push(mesh);
+        animData.push({ type: 'sphere', baseY: py, offset: Math.random() * Math.PI * 2, speed: Math.random() * 0.4 + 0.3 });
+      }
+    }
+
+    function buildScene() {
+      clearScene();
+      const shape = currentTheme.shape;
+      if (shape === 'particles') buildParticles();
+      else if (shape === 'rings') buildRings();
+      else buildSpheres();
+    }
+    buildScene();
+
+    // ── Per-frame animation ───────────────────────────────────────────────────
+    function animateScene(t) {
+      sceneObjects.forEach((obj, i) => {
+        const d = animData[i];
+        if (d.type === 'sphere') {
+          obj.position.y = d.baseY + Math.sin(t * d.speed + d.offset) * 1.5;
+          obj.rotation.y += 0.004; obj.rotation.x += 0.002;
+        } else if (d.type === 'ring') {
+          obj.rotation.x += d.rx;
+          obj.rotation.y += d.ry;
+          obj.rotation.z += d.rz;
+        } else if (d.type === 'particles') {
+          // Gentle drift: shift the whole points group
+          obj.rotation.y += 0.0008;
+          obj.rotation.x += 0.0003;
+        }
+      });
+    }
+
+    // ── 2D text helpers ───────────────────────────────────────────────────────
+    function wrapText(text, maxLen) {
+      if (text.length <= maxLen) return [text];
+      const lines = []; let cur = '';
+      for (const ch of text) {
+        cur += ch;
+        if (cur.length >= maxLen && /[。、.,]/.test(ch)) { lines.push(cur); cur = ''; }
+      }
+      if (cur) lines.push(cur);
+      return lines;
+    }
+
+    // ── Composite (called every frame) ────────────────────────────────────────
+    // renderer.render() must be immediately before ctx.drawImage() so the
+    // WebGL buffer is still populated (it clears at the start of the next render).
+    function composite() {
+      renderer.render(scene, camera);
+      ctx.drawImage(threeCanvas, 0, 0);
+
+      const vig = currentTheme.vigRgb;
+      const vL = ctx.createLinearGradient(0, 0, W * 0.72, 0);
+      vL.addColorStop(0,   `rgba(${vig},0.90)`);
+      vL.addColorStop(0.5, `rgba(${vig},0.58)`);
+      vL.addColorStop(1,   `rgba(${vig},0.0)`);
+      ctx.fillStyle = vL; ctx.fillRect(0, 0, W, H);
+
+      const vV = ctx.createLinearGradient(0, 0, 0, H);
+      vV.addColorStop(0,    `rgba(${vig},0.52)`);
+      vV.addColorStop(0.35, `rgba(${vig},0)`);
+      vV.addColorStop(0.7,  `rgba(${vig},0)`);
+      vV.addColorStop(1,    `rgba(${vig},0.58)`);
+      ctx.fillStyle = vV; ctx.fillRect(0, 0, W, H);
+
+      const PX = 72;
+      const th = currentTheme;
+      const eyebrow  = document.getElementById('eyebrow').value.trim();
+      const headline = document.getElementById('headline').value.trim();
+      const subcopy  = document.getElementById('subcopy').value.trim();
+
+      // Accent bar
+      ctx.save();
+      const barG = ctx.createLinearGradient(PX, 0, PX + 96, 0);
+      barG.addColorStop(0, th.accent1); barG.addColorStop(1, th.accent2);
+      ctx.fillStyle = barG; ctx.fillRect(PX, 188, 88, 4);
+      ctx.restore();
+
+      // Eyebrow
+      if (eyebrow) {
+        ctx.save();
+        ctx.font = '400 20px system-ui,sans-serif';
+        ctx.fillStyle = th.eyebrowColor;
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.fillText(eyebrow, PX, 226);
+        ctx.restore();
+      }
+
+      // Headline
+      const lines = wrapText(headline, 16);
+      ctx.save();
+      ctx.font = '900 66px system-ui,sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.shadowColor = th.glowColor; ctx.shadowBlur = 22;
+      ctx.fillStyle = '#ffffff';
+      lines.forEach((line, i) => ctx.fillText(line, PX, 314 + i * 84));
+      ctx.restore();
+
+      // Subcopy
+      ctx.save();
+      ctx.font = '400 25px system-ui,sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.66)';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(subcopy, PX, 314 + lines.length * 84 + 30);
+      ctx.restore();
+
+      // URL
+      ctx.save();
+      ctx.font = '400 17px "SF Mono","Fira Code",monospace';
+      ctx.fillStyle = 'rgba(255,255,255,0.28)';
+      ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText('aooba.net', W - PX, H - 38);
+      ctx.restore();
+    }
+
+    // ── Animation loop ────────────────────────────────────────────────────────
+    let frozen = false, t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!frozen) { t += 0.016; animateScene(t); }
+      composite();
+    }
+    animate();
+
+    // ── Apply variant ─────────────────────────────────────────────────────────
+    function applyVariant(key) {
+      activeVariant = key;
+      currentTheme  = THEMES[key];
+
+      document.documentElement.style.setProperty('--theme-color', currentTheme.themeColor);
+
+      // Update slider range + label for this shape type
+      const countEl = document.getElementById('obj-count');
+      countEl.min   = currentTheme.countMin;
+      countEl.max   = currentTheme.countMax;
+      countEl.value = currentTheme.countDefault;
+      document.getElementById('count-label').textContent = currentTheme.countLabel;
+      document.getElementById('obj-opacity').value = currentTheme.opacityDefault;
+
+      // Update copy
+      const c = currentTheme.copy;
+      document.getElementById('eyebrow').value  = c.eyebrow;
+      document.getElementById('headline').value = c.headline;
+      document.getElementById('subcopy').value  = c.subcopy;
+
+      // Update Three.js
+      keyLight.color.set(currentTheme.keyColor);
+      fillLight.color.set(currentTheme.fillColor);
+      updateBg();
+      buildScene();
+
+      // Active tab highlight
+      document.querySelectorAll('.btn-variant').forEach(b => {
+        b.classList.toggle('active', b.dataset.variant === key);
+      });
+    }
+
+    // Init CSS var
+    document.documentElement.style.setProperty('--theme-color', currentTheme.themeColor);
+
+    // ── Events ────────────────────────────────────────────────────────────────
+    document.querySelectorAll('.btn-variant').forEach(btn => {
+      btn.addEventListener('click', () => applyVariant(btn.dataset.variant));
+    });
+
+    document.getElementById('btn-freeze').addEventListener('click', function() {
+      frozen = !frozen;
+      this.textContent = frozen ? '▶ Play' : '⏸ Freeze';
+    });
+
+    document.getElementById('btn-randomize').addEventListener('click', buildScene);
+    document.getElementById('bg-lightness').addEventListener('input', updateBg);
+    document.getElementById('obj-count').addEventListener('input', buildScene);
+    document.getElementById('obj-opacity').addEventListener('input', () => {
+      const op = parseInt(document.getElementById('obj-opacity').value) / 100;
+      sceneObjects.forEach(o => {
+        if (o.material) o.material.opacity = op;
+      });
+    });
+
+    document.getElementById('btn-save').addEventListener('click', () => {
+      frozen = true;
+      document.getElementById('btn-freeze').textContent = '▶ Play';
+      composite();
+      const link = document.createElement('a');
+      link.download = `og-image-variant-${activeVariant.toLowerCase()}.png`;
+      link.href = output.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+</body>
+</html>
