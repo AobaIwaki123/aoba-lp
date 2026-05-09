@@ -19,10 +19,11 @@ export async function GET(req: NextRequest) {
   const meta = PAGE_META[page] ?? PAGE_META.home
   const variantLower = variant.toLowerCase()
   
-  let bgSrc: ArrayBuffer | null = null
+  let bgSrc: string | null = null
   try {
     const bgPath = path.join(process.cwd(), 'public', 'og', `variant-${variantLower}-bg.png`)
-    bgSrc = fs.readFileSync(bgPath).buffer as ArrayBuffer
+    const buf = fs.readFileSync(bgPath)
+    bgSrc = `data:image/png;base64,${buf.toString('base64')}`
   } catch (error) {
     console.warn('Could not read background image.', error)
   }
@@ -30,7 +31,8 @@ export async function GET(req: NextRequest) {
   let fontData: ArrayBuffer | null = null
   try {
     const fontPath = path.join(process.cwd(), 'public', 'fonts', 'NotoSansJP-Bold.ttf')
-    fontData = fs.readFileSync(fontPath).buffer as ArrayBuffer
+    const buf = fs.readFileSync(fontPath)
+    fontData = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer
   } catch (error) {
     console.warn('Could not read font file.', error)
   }
@@ -55,7 +57,6 @@ export async function GET(req: NextRequest) {
       <div style={{ width: 1200, height: 630, position: 'relative', display: 'flex' }}>
         {/* 背景 PNG */}
         {bgSrc && (
-          // @ts-expect-error Satori accepts ArrayBuffer for src
           <img src={bgSrc} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
         )}
         {/* テキスト */}
