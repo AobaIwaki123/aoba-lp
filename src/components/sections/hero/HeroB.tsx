@@ -6,8 +6,8 @@ import { Suspense } from 'react'
 import type { VariantConfig } from '@/lib/variants/config'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
-const WireframeIcosahedron = dynamic(
-  () => import('@/components/canvas/WireframeIcosahedron'),
+const FloatingRings = dynamic(
+  () => import('@/components/canvas/FloatingRings'),
   { ssr: false }
 )
 
@@ -24,11 +24,11 @@ export function HeroB({ config }: Props) {
       {isDesktop && (
         <div className="absolute inset-0 z-0">
           <Suspense fallback={
-            <div className="w-full h-full bg-zinc-950 flex items-center justify-center">
-              <div className="w-32 h-32 border border-purple-500/30 rotate-45 animate-pulse" />
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full border border-purple-500/30 animate-ping" />
             </div>
           }>
-            <WireframeIcosahedron />
+            <FloatingRings />
           </Suspense>
         </div>
       )}
