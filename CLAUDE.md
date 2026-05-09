@@ -54,7 +54,7 @@ src/
 ```
 
 **重要ファイル**:
-- `src/proxy.ts` — Next.js の新ファイル規約（旧 `middleware.ts`）。`proxy` という名前で export する。Edge Runtime 制約のため DB インポート不可・独自 `Variant` 型を定義。**このファイルがないと A/B テストが機能しない**
+- `src/proxy.ts` — Next.js 16 の公式規約（旧 `middleware.ts`、[移行ドキュメント](https://nextjs.org/docs/messages/middleware-to-proxy)）。`proxy` という名前で export する。**Edge Runtime がデフォルト**のため DB の実体インポート不可（`import type` のみ可）。**このファイルがないと A/B テストが機能しない**
 - `drizzle.config.ts` — マイグレーション時に `DATABASE_URL_UNPOOLED`（直接接続）を参照する設定
 - `next.config.ts` — CSP・セキュリティヘッダーが定義される（`security.md §2.1` と対応）
 

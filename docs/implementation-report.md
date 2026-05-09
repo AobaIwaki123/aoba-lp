@@ -22,7 +22,7 @@
 
 ### 2.2 A/Bテスト基盤
 - **Next.js 16 規約への対応**: `proxy.ts` を用いたランダムなバリアント割り当て（現在は MVP として A / C の 50% ずつに設定）と、`?__variant=X` による強制上書き。
-- **型の統一**: Node.js runtime の恩恵を受け、`src/lib/db/schema.ts` から `AbVariant` を直接参照するようリファクタリング。
+- **型の統一**: `src/lib/db/schema.ts` から `AbVariant` を `import type` で参照（型のみのインポートのため Edge Runtime 制約に抵触しない）。
 
 ### 2.3 バックエンド / インフラ
 - **データベース (Neon + Drizzle ORM)**: お問い合わせデータの保存スキーマ (`contact_submissions`)。
@@ -39,7 +39,7 @@
 設計フェーズからの主な変更点（ドリフト）は以下の通りであり、該当する設計ドキュメント (`requirements.md`, `architecture.md`, `design.md`) は修正済みです。
 
 - **Next.js バージョンの更新**: バージョン 15 から 16 への移行。
-- **ミドルウェアの変更**: `middleware.ts` ではなく、Next.js 16 の `proxy.ts` 規約を採用。これに伴いランタイムが Edge から Node.js に変更されたため、DB スキーマの型定義を直接利用可能になりました。
+- **ミドルウェアの変更**: `middleware.ts` ではなく、Next.js 16 の `proxy.ts` 規約を採用。`middleware` という名称が Express.js と混同されやすいことを理由に Next.js 16 で正式にリネームされた（[公式ドキュメント](https://nextjs.org/docs/messages/middleware-to-proxy)）。**ランタイムは引き続き Edge Runtime がデフォルト**であり、Node.js への変更は発生していない。`import type` による型のみのインポートを使用しているため Edge 制約に抵触しない。
 - **API Routes から Server Actions への集約**: お問い合わせフォームの送信処理を Server Actions に一本化し、Webhook 用の `/api/contact/route.ts` の優先度を下げました（必要に応じて追加可能）。
 
 ## 4. 今後のタスク
