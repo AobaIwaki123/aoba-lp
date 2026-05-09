@@ -14,7 +14,7 @@ const redisUrl = process.env.UPSTASH_REDIS_REST_URL
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
 
 // Fallback logic for local development and E2E tests where Upstash is not configured
-const ratelimit = redisUrl && redisToken
+const ratelimit = redisUrl && redisToken && process.env.NODE_ENV !== 'development'
   ? new Ratelimit({
       redis: new Redis({ url: redisUrl, token: redisToken }),
       limiter: Ratelimit.slidingWindow(
@@ -22,7 +22,7 @@ const ratelimit = redisUrl && redisToken
         '1 h'
       ),
     })
-  : { limit: async () => ({ success: true }) }
+  : null
 
 export type ActionResult =
   | { success: true; id: string }
@@ -82,6 +82,9 @@ export async function submitContact(
       idempotencyKey,
     })
     after(() => sendNotification(contact))
+    if (process.env.NODE_ENV === 'development') {
+      after(() => notifySlack(`✅ [dev] お問い合わせ受信: ${parsed.data.name} <${parsed.data.email}> 件名="${parsed.data.subject}" variant=${variant}`))
+    }
     return { success: true, id: contact.id }
   } catch (error) {
     const cause = error instanceof Error ? (error as Error & { cause?: unknown }).cause : undefined
