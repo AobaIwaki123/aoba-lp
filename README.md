@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://vercel.com/new/clone?repository-url=https://github.com/AobaIwaki/aoba-lp&env=DATABASE_URL,DATABASE_URL_UNPOOLED,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,RESEND_API_KEY,RESEND_FROM,ADMIN_EMAIL,SLACK_WEBHOOK_URL">
+  <a href="https://vercel.com/new/clone?repository-url=https://github.com/AobaIwaki123/aoba-lp&env=DATABASE_URL,DATABASE_URL_UNPOOLED,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,NEXT_PUBLIC_SITE_URL,RESEND_API_KEY,CONTACT_EMAIL,SLACK_WEBHOOK_URL">
     <img src="https://vercel.com/button" alt="Deploy with Vercel" height="36" />
   </a>
   &nbsp;&nbsp;
@@ -115,7 +115,7 @@ Slack Webhook 通知
 ### 1. リポジトリのクローンと依存インストール
 
 ```bash
-git clone https://github.com/AobaIwaki/aoba-lp.git
+git clone https://github.com/AobaIwaki123/aoba-lp.git
 cd aoba-lp
 pnpm install
 ```
@@ -153,9 +153,9 @@ pnpm dev           # http://localhost:3000
 | `DATABASE_URL_UNPOOLED` | ✅ | Neon の直接接続（マイグレーション用） |
 | `UPSTASH_REDIS_REST_URL` | ✅ | Upstash Redis の REST URL |
 | `UPSTASH_REDIS_REST_TOKEN` | ✅ | Upstash Redis の REST トークン |
+| `NEXT_PUBLIC_SITE_URL` | ✅ | 本番サイトの URL（例: `https://aooba.net`）OGP・メール本文で使用 |
 | `RESEND_API_KEY` | ✅ | Resend の API キー |
-| `RESEND_FROM` | ✅ | 送信元メールアドレス（例: `noreply@example.com`） |
-| `ADMIN_EMAIL` | ✅ | 管理者通知の宛先メールアドレス |
+| `CONTACT_EMAIL` | ✅ | 管理者通知の宛先メールアドレス |
 | `SLACK_WEBHOOK_URL` | ✅ | Slack Incoming Webhook URL |
 | `RATE_LIMIT_BYPASS_KEY` | — | レート制限バイパス用シークレット（テスト用） |
 
@@ -210,7 +210,7 @@ pnpm dev           # http://localhost:3000
 3. コードを変更し `pnpm lint && pnpm tsc --noEmit && pnpm test --run` が通ることを確認
 4. Pull Request を作成する
 
-バグ報告・機能提案は [Issues](https://github.com/AobaIwaki/aoba-lp/issues) から歓迎します。
+バグ報告・機能提案は [Issues](https://github.com/AobaIwaki123/aoba-lp/issues) から歓迎します。
 
 ---
 
