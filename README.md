@@ -91,16 +91,16 @@ Slack Webhook 通知
 
 ## コスト試算（Free Tier 活用時）
 
-| サービス | 無料枠 | 月額コスト |
-|---|---|---|
-| Vercel (Hobby) | 商用利用可・帯域無制限 | $0 |
-| Neon (Free) | 0.5 GB ストレージ・計算 0.19 CU/月 | $0 |
-| Upstash Redis (Free) | 10,000 req/日 | $0 |
-| Resend (Free) | 3,000 通/月 | $0 |
-| Slack | Incoming Webhook | $0 |
-| **合計** | | **$0〜** |
+| サービス | プラン | 主な制限 | 月額コスト |
+|---|---|---|---|
+| Vercel | Hobby | **個人・非商用利用のみ** | $0 |
+| Vercel | Pro | 商用利用可・チーム機能・SLA あり | $20〜 |
+| Neon | Free | 512 MB ストレージ・月 100 時間コンピュート・5 GB データ転送 | $0 |
+| Upstash Redis | Free | 10,000 req/日・月 50 万コマンド上限・256 MB データサイズ | $0 |
+| Resend | Free | 3,000 通/月・1 カスタムドメイン | $0 |
+| Slack | — | Incoming Webhook は無制限 | $0 |
 
-> 月間問い合わせ数が数百件規模になっても Free Tier で運用可能。スケールアップが必要になった時点で各サービスの有料プランに移行してください。
+> ⚠️ **Vercel Hobby プランは商用利用不可（個人・非商用のみ）。** コーポレート LP など業務目的で利用する場合は Vercel Pro（$20/月〜）が必要です。Neon・Upstash Redis・Resend は商用利用可の無料枠があるため、Vercel Pro のみが実質的な固定コストになります。
 
 ---
 
