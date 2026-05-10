@@ -197,7 +197,7 @@ pnpm dev           # http://localhost:3000
 | [DB 設計書](docs/database.md) | テーブル定義、インデックス、マイグレーション手順 |
 | [セキュリティ設計書](docs/security.md) | 脅威モデル、インシデント対応 |
 | [セキュリティ実装ガイド](docs/security-impl.md) | 各対策のコード解説（実装者向け） |
-| [実装ガイド](docs/implementation-guide.md) | フェーズ別タスク、コーディング規約 |
+| [実装ガイド](docs/archive/implementation-guide.md) | フェーズ別タスク、コーディング規約 |
 | [用語集](docs/glossary.md) | WebGL・冪等性キー・Edge Runtime 等の用語解説 |
 
 ---
